@@ -101,16 +101,27 @@ https://monroegamble.github.io/WebApp/StockChart/chart.html
 - **HTML5/CSS3/JavaScript**: Pure vanilla implementation
 - **Chart.js 4.4.0**: Powerful charting library
 - **Chart.js Zoom Plugin**: Interactive zoom and pan
-- **Yahoo Finance API**: Real-time stock data
+- **Stooq API**: Free, reliable stock data with no rate limits
 
 ### Data Source
 ```
-Endpoint: https://query1.finance.yahoo.com/v8/finance/chart/{TICKER}
+Endpoint: https://stooq.com/q/d/l/?s={TICKER}.US&i=d
 ```
 
-Parameters:
-- `interval`: 1d (daily data)
-- `range`: Varies based on selected time range
+Returns CSV format:
+```csv
+Date,Open,High,Low,Close,Volume
+2024-01-02,290.30,293.48,289.97,292.12,2408700
+2024-01-03,292.00,293.80,289.40,291.16,2898700
+```
+
+Benefits:
+- **No authentication** required
+- **No rate limits** - unlimited requests
+- **Adjusted prices** included (splits, dividends)
+- **Clean CSV format** - easy to parse
+- **Historical data** going back decades
+- **100% free** forever
 
 ### Price Data
 The widget uses **adjusted close prices** which account for:
@@ -200,32 +211,30 @@ In `style.css`, modify `.chart-container`:
 
 ## ⚠️ Limitations
 
-### API Rate Limits
-- Yahoo Finance may rate-limit requests
-- Recommended: Don't refresh more than once per minute
-- Solution: Data is cached until time range changes
-
 ### Data Availability
+- Stooq primarily supports US stocks (append `.US` to ticker)
 - Some tickers may have limited historical data
 - Delisted stocks may not return data
-- International stocks: Use full ticker (e.g., `TSLA.L` for London)
+- For international stocks: Use appropriate suffix (e.g., `.UK`, `.DE`)
 
-### CORS Restrictions
-- Yahoo Finance API allows cross-origin requests
-- If hosting locally, ensure proper CORS configuration
+### Data Updates
+- Daily data updated after market close
+- Not real-time intraday data (end-of-day only)
+- Perfect for historical analysis and long-term charting
+- Not suitable for day-trading or real-time monitoring
 
-### Real-Time Data
-- Data updates are delayed (typically 15-20 minutes)
-- Not suitable for day-trading applications
-- For real-time quotes, consider paid APIs
+### CORS & Hosting
+- Stooq API allows cross-origin requests
+- Works directly from GitHub Pages, static hosts, or local files
+- No server-side proxy required
 
 ## 🛠️ Troubleshooting
 
 ### "Failed to load data" Error
-- Verify the ticker symbol is correct
+- Verify the ticker symbol is correct (US stocks only by default)
 - Check internet connection
-- Try a different ticker to test API availability
-- Wait 1 minute and try again (rate limiting)
+- Try a well-known ticker like AAPL or MSFT to test API
+- Ensure ticker exists on Stooq (visit stooq.com to verify)
 
 ### Chart Not Displaying
 - Check browser console for JavaScript errors
@@ -248,12 +257,12 @@ In `style.css`, modify `.chart-container`:
 
 - **No data collection**: Widget runs entirely client-side
 - **No cookies**: No tracking or user data storage
-- **No backend**: All API calls made directly to Yahoo Finance
+- **No backend**: All API calls made directly to Stooq
 - **Open source**: All code is visible and auditable
 
 ## 📄 License
 
-This project is provided as-is for educational and personal use. Yahoo Finance data is subject to their terms of service.
+This project is provided as-is for educational and personal use. Stooq data is freely available for personal and commercial use.
 
 ## 🤝 Contributing
 
@@ -275,7 +284,7 @@ For questions or issues:
 
 - **Stock Ticker Widget**: Scrolling ticker tape at `/Website/ticker.html`
 - **Chart.js Documentation**: https://www.chartjs.org/docs/latest/
-- **Yahoo Finance**: https://finance.yahoo.com/
+- **Stooq**: https://stooq.com/ (data source)
 
 ## 📊 Example Ticker Symbols
 
@@ -308,6 +317,6 @@ For questions or issues:
 
 ---
 
-**Built with ❤️ using Chart.js and Yahoo Finance API**
+**Built with ❤️ using Chart.js and Stooq API**
 
 *Last Updated: 2025*

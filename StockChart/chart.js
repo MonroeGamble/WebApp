@@ -359,7 +359,8 @@ function updateChart() {
 }
 
 async function fetchAdjustedPrices(ticker, range) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=${range}`;
+    // Stooq API endpoint - returns CSV with adjusted prices
+    const url = `https://stooq.com/q/d/l/?s=${ticker}.US&i=d`;
 
     try {
         const response = await fetch(url);
@@ -368,49 +369,120 @@ async function fetchAdjustedPrices(ticker, range) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const json = await response.json();
+        const text = await response.text();
 
-        if (!json.chart || !json.chart.result || json.chart.result.length === 0) {
+        // Parse CSV (format: Date,Open,High,Low,Close,Volume)
+        const lines = text.trim().split('\n');
+
+        if (lines.length < 2) {
             throw new Error('No data in response');
         }
 
-        const result = json.chart.result[0];
-        const timestamps = result.timestamp;
-        const quote = result.indicators.quote[0];
+        // Skip header row
+        const dataRows = lines.slice(1);
 
-        // Try to get adjusted close, fall back to regular close
-        let prices = null;
-        if (result.indicators.adjclose && result.indicators.adjclose[0]) {
-            prices = result.indicators.adjclose[0].adjclose;
-        } else {
-            prices = quote.close;
+        // Parse all data
+        const allData = [];
+        for (const row of dataRows) {
+            const [dateStr, open, high, low, close, volume] = row.split(',');
+
+            // Skip invalid rows
+            if (!dateStr || !close) continue;
+
+            const parsedDate = new Date(dateStr);
+            const parsedClose = parseFloat(close);
+            const parsedOpen = parseFloat(open);
+            const parsedHigh = parseFloat(high);
+            const parsedLow = parseFloat(low);
+            const parsedVolume = parseInt(volume);
+
+            // Skip if parsing failed
+            if (isNaN(parsedClose) || isNaN(parsedDate.getTime())) continue;
+
+            allData.push({
+                date: parsedDate,
+                price: parsedClose,  // Already adjusted by Stooq
+                open: isNaN(parsedOpen) ? null : parsedOpen,
+                high: isNaN(parsedHigh) ? null : parsedHigh,
+                low: isNaN(parsedLow) ? null : parsedLow,
+                volume: isNaN(parsedVolume) ? null : parsedVolume
+            });
         }
 
-        if (!timestamps || !prices) {
-            throw new Error('Missing required data fields');
+        if (allData.length === 0) {
+            throw new Error('No valid data found');
         }
 
-        // Combine all data
-        const data = [];
-        for (let i = 0; i < timestamps.length; i++) {
-            if (prices[i] !== null) {
-                data.push({
-                    date: new Date(timestamps[i] * 1000),
-                    price: prices[i],
-                    open: quote.open?.[i],
-                    high: quote.high?.[i],
-                    low: quote.low?.[i],
-                    volume: quote.volume?.[i]
-                });
-            }
-        }
+        // Sort by date ascending (oldest first)
+        allData.sort((a, b) => a.date - b.date);
 
-        return data;
+        // Filter data based on time range
+        const filteredData = filterDataByRange(allData, range);
+
+        return filteredData;
 
     } catch (error) {
         console.error(`Error fetching data for ${ticker}:`, error);
         throw error;
     }
+}
+
+function filterDataByRange(data, range) {
+    if (!data || data.length === 0) return data;
+
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    let cutoffDate;
+
+    switch (range) {
+        case '1d':
+            // Last trading day
+            return data.slice(-1);
+        case '5d':
+            // Last 5 trading days (approximately 1 week)
+            return data.slice(-5);
+        case '1mo':
+            // Last ~30 days
+            cutoffDate = new Date(now);
+            cutoffDate.setDate(cutoffDate.getDate() - 30);
+            break;
+        case '6mo':
+            // Last ~180 days
+            cutoffDate = new Date(now);
+            cutoffDate.setDate(cutoffDate.getDate() - 180);
+            break;
+        case 'ytd':
+            // Year to date
+            cutoffDate = startOfYear;
+            break;
+        case '1y':
+            // Last 365 days
+            cutoffDate = new Date(now);
+            cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
+            break;
+        case '2y':
+            // Last 2 years
+            cutoffDate = new Date(now);
+            cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
+            break;
+        case '5y':
+            // Last 5 years
+            cutoffDate = new Date(now);
+            cutoffDate.setFullYear(cutoffDate.getFullYear() - 5);
+            break;
+        case '10y':
+            // Last 10 years
+            cutoffDate = new Date(now);
+            cutoffDate.setFullYear(cutoffDate.getFullYear() - 10);
+            break;
+        case 'max':
+        default:
+            // Return all data
+            return data;
+    }
+
+    // Filter data after cutoff date
+    return data.filter(d => d.date >= cutoffDate);
 }
 
 function resetZoom() {
