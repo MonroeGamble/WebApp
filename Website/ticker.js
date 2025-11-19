@@ -1,5 +1,6 @@
 // ============================================================================
 // STOCK TICKER CONFIGURATION
+// Version: 1.1 - CORS Proxy Enabled
 // ============================================================================
 // Modify this array to add or remove ticker symbols
 const TICKER_SYMBOLS = [
