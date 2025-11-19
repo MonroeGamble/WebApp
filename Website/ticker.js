@@ -32,9 +32,14 @@ let lastKnownData = {};
  */
 async function fetchStockData() {
   const symbolsParam = TICKER_SYMBOLS.join(',');
-  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}`;
+  const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}`;
+
+  // Use CORS proxy to bypass browser CORS restrictions
+  const corsProxy = 'https://api.allorigins.win/raw?url=';
+  const url = corsProxy + encodeURIComponent(yahooUrl);
 
   try {
+    console.log('Fetching stock data...');
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -42,6 +47,12 @@ async function fetchStockData() {
     }
 
     const data = await response.json();
+
+    // Check if we got valid data
+    if (!data.quoteResponse || !data.quoteResponse.result) {
+      throw new Error('Invalid API response structure');
+    }
+
     const quotes = data.quoteResponse.result;
     const stockData = {};
 
@@ -61,10 +72,11 @@ async function fetchStockData() {
 
     // Update cache with successful data
     lastKnownData = stockData;
+    console.log(`Successfully fetched data for ${Object.keys(stockData).length} stocks`);
     return stockData;
 
   } catch (error) {
-    console.warn('Failed to fetch stock data:', error.message);
+    console.error('Failed to fetch stock data:', error.message);
 
     // Return cached data if available, otherwise return fallback
     if (Object.keys(lastKnownData).length > 0) {
@@ -73,6 +85,7 @@ async function fetchStockData() {
     }
 
     // Return fallback data with N/A values
+    console.warn('No cached data available, using fallback');
     return getFallbackData();
   }
 }

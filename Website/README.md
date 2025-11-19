@@ -335,6 +335,12 @@ This widget uses the **Yahoo Finance API** to fetch live stock data:
 https://query1.finance.yahoo.com/v7/finance/quote?symbols=MCD,YUM,QSR...
 ```
 
+**CORS Proxy:**
+To bypass browser CORS restrictions, the widget uses `allorigins.win` as a CORS proxy:
+```
+https://api.allorigins.win/raw?url=[YAHOO_FINANCE_URL]
+```
+
 **Data Retrieved:**
 - `regularMarketPrice` – Current stock price
 - `regularMarketChangePercent` – Percentage change
@@ -347,6 +353,8 @@ https://query1.finance.yahoo.com/v7/finance/quote?symbols=MCD,YUM,QSR...
 **Fallback Behavior:**
 - If API fails, displays cached data
 - If no cache available, shows "N/A"
+
+**Note:** CORS proxies are necessary because browsers block direct cross-origin requests to Yahoo Finance. The allorigins.win service is free and reliable for this purpose.
 
 ## Browser Compatibility
 
