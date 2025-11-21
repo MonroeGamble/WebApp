@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Stock Charts - FranchiseIQ</title>
+    <link rel="stylesheet" href="charts.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Header with Logo -->
+    <header class="page-header">
+        <a href="../index.html" class="logo-link">
+            <img src="../logo.svg" alt="FranchiseIQ Logo" class="logo">
+        </a>
+        <h1>Stock Market Charts</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="controls">
+            <label for="stock-select">Select Stock:</label>
+            <select id="stock-select">
+                <option value="MCD">McDonald's (MCD)</option>
+                <option value="YUM">Yum! Brands (YUM)</option>
+                <option value="QSR">Restaurant Brands (QSR)</option>
+                <option value="WEN">Wendy's (WEN)</option>
+                <option value="DPZ">Domino's (DPZ)</option>
+                <option value="JACK">Jack in the Box (JACK)</option>
+                <option value="WING">Wingstop (WING)</option>
+                <option value="SHAK">Shake Shack (SHAK)</option>
+                <option value="CAVA">CAVA (CAVA)</option>
+                <option value="MAR">Marriott (MAR)</option>
+                <option value="HLT">Hilton (HLT)</option>
+                <option value="H">Hyatt (H)</option>
+                <option value="PLNT">Planet Fitness (PLNT)</option>
+            </select>
+
+            <label for="timeframe-select">Timeframe:</label>
+            <select id="timeframe-select">
+                <option value="1d">1 Day</option>
+                <option value="5d" selected>5 Days</option>
+                <option value="1mo">1 Month</option>
+                <option value="3mo">3 Months</option>
+                <option value="6mo">6 Months</option>
+                <option value="1y">1 Year</option>
+            </select>
+
+            <button id="refresh-btn">Refresh Data</button>
+        </div>
+
+        <div class="chart-info">
+            <h2 id="chart-title">Loading...</h2>
+            <div id="chart-stats"></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="stockChart"></canvas>
+        </div>
+
+        <div id="loading" class="loading">Loading chart data...</div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <!-- Sitemap Footer -->
+    <footer class="sitemap">
+        <div class="sitemap-container">
+            <div class="sitemap-section">
+                <h3>Pages</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="ticker.html">Stock Ticker</a></li>
+                    <li><a href="charts.html">Stock Charts</a></li>
+                </ul>
+            </div>
+            <div class="sitemap-section">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="README.md">Documentation</a></li>
+                    <li><a href="https://github.com/MonroeGamble/WebApp" target="_blank">GitHub Repo</a></li>
+                </ul>
+            </div>
+            <div class="sitemap-section">
+                <h3>About</h3>
+                <p>FranchiseIQ - Live stock tracking for franchise companies</p>
+                <p style="font-size: 0.85em; margin-top: 10px;">Data provided by Yahoo Finance</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2024 FranchiseIQ. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="charts.js"></script>
+</body>
+</html>

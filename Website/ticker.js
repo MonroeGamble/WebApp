@@ -35,60 +35,92 @@ async function fetchStockData() {
   const symbolsParam = TICKER_SYMBOLS.join(',');
   const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}`;
 
-  // Use CORS proxy to bypass browser CORS restrictions
-  const corsProxy = 'https://api.allorigins.win/raw?url=';
-  const url = corsProxy + encodeURIComponent(yahooUrl);
+  // Try multiple CORS proxies for reliability
+  const corsProxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+    ''  // Try direct as last resort
+  ];
 
-  try {
-    console.log('Fetching stock data...');
-    const response = await fetch(url);
+  for (let i = 0; i < corsProxies.length; i++) {
+    const proxy = corsProxies[i];
+    const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
 
-    if (!response.ok) {
-      throw new Error(`API returned status ${response.status}`);
+    try {
+      console.log(`Attempt ${i + 1}: Fetching stock data using ${proxy ? 'proxy' : 'direct'}...`);
+      console.log(`URL: ${url.substring(0, 100)}...`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      console.log(`Response status: ${response.status}`);
+
+      if (!response.ok) {
+        throw new Error(`API returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Received data:', data);
+
+      // Check if we got valid data
+      if (!data.quoteResponse || !data.quoteResponse.result) {
+        throw new Error('Invalid API response structure');
+      }
+
+      const quotes = data.quoteResponse.result;
+      console.log(`Found ${quotes.length} quotes`);
+
+      const stockData = {};
+
+      quotes.forEach(quote => {
+        const symbol = quote.symbol;
+        const price = quote.regularMarketPrice;
+        const change = quote.regularMarketChangePercent;
+
+        stockData[symbol] = {
+          symbol: symbol,
+          price: price !== undefined && price !== null ? price.toFixed(2) : 'N/A',
+          changePercent: change !== undefined && change !== null ? change.toFixed(2) : '–',
+          isPositive: change > 0,
+          isNegative: change < 0
+        };
+      });
+
+      // Update cache with successful data
+      lastKnownData = stockData;
+      console.log(`✓ Successfully fetched data for ${Object.keys(stockData).length} stocks`);
+      return stockData;
+
+    } catch (error) {
+      console.error(`Proxy ${i + 1} failed:`, error.message);
+
+      // If this isn't the last proxy, continue to next one
+      if (i < corsProxies.length - 1) {
+        console.log('Trying next proxy...');
+        continue;
+      }
+
+      // All proxies failed
+      console.error('All fetch attempts failed');
+
+      // Return cached data if available
+      if (Object.keys(lastKnownData).length > 0) {
+        console.info('Using cached stock data');
+        return lastKnownData;
+      }
+
+      // Return fallback data with N/A values
+      console.warn('No cached data available, using fallback');
+      return getFallbackData();
     }
-
-    const data = await response.json();
-
-    // Check if we got valid data
-    if (!data.quoteResponse || !data.quoteResponse.result) {
-      throw new Error('Invalid API response structure');
-    }
-
-    const quotes = data.quoteResponse.result;
-    const stockData = {};
-
-    quotes.forEach(quote => {
-      const symbol = quote.symbol;
-      const price = quote.regularMarketPrice;
-      const change = quote.regularMarketChangePercent;
-
-      stockData[symbol] = {
-        symbol: symbol,
-        price: price !== undefined && price !== null ? price.toFixed(2) : 'N/A',
-        changePercent: change !== undefined && change !== null ? change.toFixed(2) : '–',
-        isPositive: change > 0,
-        isNegative: change < 0
-      };
-    });
-
-    // Update cache with successful data
-    lastKnownData = stockData;
-    console.log(`Successfully fetched data for ${Object.keys(stockData).length} stocks`);
-    return stockData;
-
-  } catch (error) {
-    console.error('Failed to fetch stock data:', error.message);
-
-    // Return cached data if available, otherwise return fallback
-    if (Object.keys(lastKnownData).length > 0) {
-      console.info('Using cached stock data');
-      return lastKnownData;
-    }
-
-    // Return fallback data with N/A values
-    console.warn('No cached data available, using fallback');
-    return getFallbackData();
   }
+
+  // This shouldn't be reached, but just in case
+  return getFallbackData();
 }
 
 /**

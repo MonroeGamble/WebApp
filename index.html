@@ -29,6 +29,27 @@
             color: white;
             margin-bottom: 40px;
             padding: 40px 20px;
+            position: relative;
+        }
+
+        .header-logo {
+            margin-bottom: 20px;
+        }
+
+        .logo-link-home {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .logo-link-home:hover {
+            transform: scale(1.1);
+        }
+
+        .logo-home {
+            height: 50px;
+            width: auto;
         }
 
         h1 {
@@ -169,11 +190,60 @@
             opacity: 0.9;
         }
 
-        footer {
-            text-align: center;
+        /* Sitemap Footer */
+        .sitemap-footer {
+            background: rgba(0, 0, 0, 0.3);
             color: white;
-            padding: 20px;
-            opacity: 0.9;
+            padding: 40px 20px 20px;
+            margin-top: 40px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sitemap-container-main {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .sitemap-section-main h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .sitemap-section-main ul {
+            list-style: none;
+        }
+
+        .sitemap-section-main ul li {
+            margin-bottom: 10px;
+        }
+
+        .sitemap-section-main a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .sitemap-section-main a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        .sitemap-section-main p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+        }
+
+        .copyright-main {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
         }
 
         @media (max-width: 768px) {
@@ -190,6 +260,11 @@
 <body>
     <div class="container">
         <header>
+            <div class="header-logo">
+                <a href="index.html" class="logo-link-home">
+                    <img src="logo.svg" alt="FranchiseIQ Logo" class="logo-home">
+                </a>
+            </div>
             <h1>📊 FranchiseIQ Stock Ticker</h1>
             <p class="subtitle">Live real-time stock prices for franchise companies</p>
             <div class="stats">
@@ -245,9 +320,10 @@
             <div class="card">
                 <h3>🔗 Quick Links</h3>
                 <a href="Website/ticker.html" class="button" target="_blank">Open Full Ticker</a>
+                <a href="Website/charts.html" class="button" target="_blank">View Stock Charts</a>
                 <a href="Website/README.md" class="button" target="_blank">View Documentation</a>
                 <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
-                    Download the widget files and host them on your own server, or embed directly using the code below.
+                    Explore live ticker data and interactive charts for all franchise stocks.
                 </p>
             </div>
         </div>
@@ -270,10 +346,33 @@
             </p>
         </div>
 
-        <footer>
-            <p><strong>FranchiseIQ Stock Ticker Widget</strong></p>
-            <p style="font-size: 0.9em; margin-top: 10px;">Built for tracking franchise industry public companies</p>
-            <p style="font-size: 0.85em; margin-top: 20px;">Powered by Yahoo Finance API | Updates every 60 seconds</p>
+        <!-- Sitemap Footer -->
+        <footer class="sitemap-footer">
+            <div class="sitemap-container-main">
+                <div class="sitemap-section-main">
+                    <h3>Pages</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="Website/ticker.html">Stock Ticker</a></li>
+                        <li><a href="Website/charts.html">Stock Charts</a></li>
+                    </ul>
+                </div>
+                <div class="sitemap-section-main">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="Website/README.md">Documentation</a></li>
+                        <li><a href="https://github.com/MonroeGamble/WebApp" target="_blank">GitHub Repo</a></li>
+                    </ul>
+                </div>
+                <div class="sitemap-section-main">
+                    <h3>About</h3>
+                    <p>FranchiseIQ - Live stock tracking for franchise companies</p>
+                    <p style="font-size: 0.9em; margin-top: 10px;">Powered by Yahoo Finance API | Updates every 60 seconds</p>
+                </div>
+            </div>
+            <div class="copyright-main">
+                &copy; 2024 FranchiseIQ. All rights reserved.
+            </div>
         </footer>
     </div>
 </body>
