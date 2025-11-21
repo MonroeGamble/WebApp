@@ -14,13 +14,14 @@
   background: #0a0a0a;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
   z-index: 999;
-}
-
-/* Optional: Fixed bottom positioning for site-wide ticker */
-.fiq-news-ticker-wrapper.fixed-bottom {
   position: fixed;
   bottom: 0;
   left: 0;
+}
+
+/* Optional: Static positioning for embedded use */
+.fiq-news-ticker-wrapper.embedded {
+  position: relative;
 }
 
 /* News ticker label bar (similar to status bar) */
