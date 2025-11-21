@@ -25,6 +25,17 @@ const REFRESH_INTERVAL = 3600000; // 1 hour
 let lastKnownData = {};
 let lastMarketData = {}; // Store last market close data for after-hours
 
+// Load cached data from localStorage on initialization
+try {
+  const cached = localStorage.getItem('franresearch_ticker_cache');
+  if (cached) {
+    lastKnownData = JSON.parse(cached);
+    console.log('Loaded cached data from localStorage');
+  }
+} catch (e) {
+  console.error('Failed to load cache from localStorage:', e);
+}
+
 // ============================================================================
 // YAHOO FINANCE API INTEGRATION
 // ============================================================================
@@ -97,26 +108,40 @@ async function fetchStockData() {
           change = quote.regularMarketChangePercent;
         }
 
-        stockData[symbol] = {
-          symbol: symbol,
-          price: price !== undefined && price !== null ? price.toFixed(2) : 'N/A',
-          changePercent: change !== undefined && change !== null ? change.toFixed(2) : '–',
-          isPositive: change > 0,
-          isNegative: change < 0,
-          afterHours: !marketOpen
-        };
+        // Only add to stockData if we have valid price
+        if (price !== undefined && price !== null && !isNaN(price)) {
+          stockData[symbol] = {
+            symbol: symbol,
+            price: price.toFixed(2),
+            changePercent: change !== undefined && change !== null && !isNaN(change) ? change.toFixed(2) : '–',
+            isPositive: change > 0,
+            isNegative: change < 0,
+            afterHours: !marketOpen
+          };
+        }
       });
 
-      // Update cache with successful data
-      lastKnownData = stockData;
+      // Only update cache if we got valid data
+      if (Object.keys(stockData).length > 0) {
+        // Merge with existing cache to preserve symbols that weren't updated
+        lastKnownData = { ...lastKnownData, ...stockData };
 
-      // Store as last market data if we have valid data
-      if (!isMarketOpen(getEasternTime())) {
-        lastMarketData = stockData;
+        // Store in localStorage for persistence
+        try {
+          localStorage.setItem('franresearch_ticker_cache', JSON.stringify(lastKnownData));
+          console.log(`Cached ${Object.keys(lastKnownData).length} symbols to localStorage`);
+        } catch (e) {
+          console.error('Failed to save to localStorage:', e);
+        }
+
+        // Store as last market data if market is closed
+        if (!isMarketOpen(getEasternTime())) {
+          lastMarketData = lastKnownData;
+        }
       }
 
-      console.log(`✓ Successfully fetched data for ${Object.keys(stockData).length} stocks`);
-      return stockData;
+      console.log(`✓ Successfully fetched data for ${Object.keys(stockData).length} valid stocks`);
+      return lastKnownData; // Return merged cache (includes all historical + new data)
 
     } catch (error) {
       console.error(`Proxy ${i + 1} failed:`, error.message);
