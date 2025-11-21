@@ -22,6 +22,7 @@ Dependencies:
 import feedparser
 import json
 import hashlib
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
@@ -34,24 +35,24 @@ import sys
 
 # Core franchise publication RSS feeds
 RSS_FEEDS = [
-    # TRADE PRESS & NEWS (Confirmed working feeds)
+    # TRADE PRESS & NEWS (Try WordPress standard /feed/ endpoints)
     {
-        'url': 'https://www.franchisetimes.com/search/?f=rss&t=article&c=franchise_news&s=start_time&sd=desc&l=50',
+        'url': 'https://www.franchisetimes.com/feed/',
         'name': 'Franchise Times',
         'category': 'trade_press',
-        'status': 'confirmed'
+        'status': 'best_guess'
     },
     {
-        'url': 'http://www.qsrmagazine.com/taxonomy/term/602/0/feed',
-        'name': 'QSR Magazine - Franchising',
+        'url': 'https://www.qsrmagazine.com/feed/',
+        'name': 'QSR Magazine',
         'category': 'trade_press',
-        'status': 'confirmed'
+        'status': 'best_guess'
     },
     {
-        'url': 'http://www.bluemaumau.org/frontpagestories/rss.xml?quicktabs_1=0',
+        'url': 'https://www.bluemaumau.org/feed',
         'name': 'Blue MauMau',
         'category': 'trade_press',
-        'status': 'confirmed'
+        'status': 'best_guess'
     },
     {
         'url': 'https://franchisingmagazineusa.com/feed',
@@ -230,8 +231,43 @@ def fetch_rss_feed(feed_config, source_type='rss'):
     articles = []
 
     try:
-        # Fetch with timeout
-        feed = feedparser.parse(url)
+        # Use requests with proper headers to avoid "Access denied" errors
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'application/rss+xml, application/xml, text/xml, */*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+        }
+
+        # Fetch with requests first
+        try:
+            response = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
+        except requests.exceptions.RequestException as e:
+            print(f"  ❌ Request failed: {e}")
+            return articles
+
+        # Check status
+        if response.status_code == 403:
+            print(f"  ⚠️  Access denied (403) - May be blocking automated requests")
+            return articles
+        elif response.status_code == 404:
+            print(f"  ❌ Feed not found (404) - URL may have changed")
+            return articles
+        elif response.status_code != 200:
+            print(f"  ❌ HTTP {response.status_code}: {response.reason}")
+            return articles
+
+        # Check if we actually got content
+        if not response.content:
+            print(f"  ❌ Empty response")
+            return articles
+
+        print(f"  ✓ Fetched {len(response.content)} bytes")
+
+        # Parse with feedparser
+        feed = feedparser.parse(response.content)
 
         # Check for errors
         if feed.bozo:
