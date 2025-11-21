@@ -142,7 +142,7 @@
             <span>${this.config.labelText}</span>
           </div>
           <div class="fiq-news-ticker-label-source">
-            Live Updates
+            ${this.articles.length} articles • Live Updates
           </div>
         `;
         wrapperDiv.appendChild(labelDiv);

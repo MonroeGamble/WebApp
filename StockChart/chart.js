@@ -1267,12 +1267,24 @@ function updateClockAndStatus() {
   const clockElement = document.getElementById('chart-clock');
   const indicatorElement = document.getElementById('chart-market-indicator');
   const labelElement = document.getElementById('chart-market-label');
+  const marketTimeElement = document.getElementById('chart-market-time');
+  const lastUpdatedElement = document.getElementById('chart-last-updated');
 
   if (clockElement) {
     clockElement.textContent = formatTime(etTime);
   }
 
-  if (indicatorElement && labelElement) {
+  // Update last updated time
+  if (lastUpdatedElement) {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    lastUpdatedElement.textContent = `${displayHours}:${minutes} ${ampm}`;
+  }
+
+  if (indicatorElement && labelElement && marketTimeElement) {
     const marketOpen = isMarketOpen(etTime);
     const closingSoon = isClosingSoon(etTime);
     const openingSoon = isOpeningSoon(etTime);
@@ -1280,18 +1292,20 @@ function updateClockAndStatus() {
     if (marketOpen && closingSoon) {
       indicatorElement.className = 'market-dot closing-soon';
       labelElement.textContent = 'Closing Soon';
+      marketTimeElement.textContent = 'Market closes 4:00pm EST';
     } else if (openingSoon) {
       indicatorElement.className = 'market-dot opening-soon';
       labelElement.textContent = 'Opening Soon';
+      marketTimeElement.textContent = 'Market opens 9:30am EST';
     } else if (marketOpen) {
       indicatorElement.className = 'market-dot open';
       labelElement.textContent = 'Market Open';
+      marketTimeElement.textContent = 'Closes at 4:00pm EST';
     } else {
-      // Market is closed - show countdown
+      // Market is closed
       indicatorElement.className = 'market-dot closed';
-      const secondsUntilOpen = getTimeUntilOpen(etTime);
-      const countdown = formatCountdown(secondsUntilOpen);
-      labelElement.textContent = `Opens in: ${countdown}`;
+      labelElement.textContent = 'Market Closed';
+      marketTimeElement.textContent = 'Opens at 9:30am EST';
     }
   }
 }

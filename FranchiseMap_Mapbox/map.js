@@ -1,7 +1,11 @@
 // ============================================================================
-// FRANCHISE LOCATION MAP - Google Maps Version
-// Using Google Maps JavaScript API
+// FRANCHISE LOCATION MAP
+// Using Mapbox GL JS and OpenStreetMap
 // ============================================================================
+
+// Mapbox access token (users should replace with their own)
+// Get free token at https://account.mapbox.com/
+mapboxgl.accessToken = 'pk.eyJ1IjoiZnJhbnJlc2VhcmNoIiwiYSI6ImNscXh5emRvYzBjZG0ybHF4YXR2ZXkwdTkifQ.example'; // Replace with your token
 
 // Sample franchise location data (representative locations)
 const franchiseLocations = [
@@ -46,50 +50,32 @@ const franchiseLocations = [
     { brand: 'HRB', name: 'H&R Block - Denver', type: 'Service', lat: 39.7392, lng: -104.9903, address: '16th St, Denver, CO', color: '#ffa07a' },
 ];
 
-// Global variables
+// Initialize map
 let map;
 let markers = [];
 let currentFilter = 'all';
-let infoWindow;
 
-// Initialize map (called by Google Maps API callback)
 function initMap() {
     // Create map centered on US
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 39.8283, lng: -98.5795 }, // Center of continental US
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12', // Use streets style
+        center: [-98.5795, 39.8283], // Center of continental US
         zoom: 4,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
-            position: google.maps.ControlPosition.TOP_RIGHT
-        },
-        streetViewControl: true,
-        streetViewControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_BOTTOM
-        },
-        zoomControl: true,
-        zoomControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_BOTTOM
-        },
-        fullscreenControl: true,
-        fullscreenControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_TOP
-        },
-        gestureHandling: 'greedy', // Allow one-finger pan on mobile
-        styles: [
-            {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'on' }]
-            }
-        ]
+        touchPitch: false, // Disable pitch on mobile
+        dragRotate: false // Disable rotation
     });
 
-    // Create info window
-    infoWindow = new google.maps.InfoWindow();
+    // Add navigation controls
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Add markers
-    addMarkers();
+    // Add scale control
+    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+
+    // Wait for map to load
+    map.on('load', () => {
+        addMarkers();
+    });
 
     // Handle filter changes
     document.getElementById('brand-filter').addEventListener('change', (e) => {
@@ -106,43 +92,39 @@ function initMap() {
 // Add markers to map
 function addMarkers() {
     franchiseLocations.forEach(location => {
-        // Create custom marker icon (colored circle)
-        const icon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: location.color,
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3
-        };
+        // Create marker element
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.backgroundColor = location.color;
+        el.style.width = '20px';
+        el.style.height = '20px';
+        el.style.borderRadius = '50%';
+        el.style.border = '3px solid white';
+        el.style.cursor = 'pointer';
+        el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+        el.style.transition = 'transform 0.2s';
+
+        el.addEventListener('mouseenter', () => {
+            el.style.transform = 'scale(1.3)';
+        });
+
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = 'scale(1)';
+        });
 
         // Create marker
-        const marker = new google.maps.Marker({
-            position: { lat: location.lat, lng: location.lng },
-            map: map,
-            icon: icon,
-            title: location.name,
-            animation: google.maps.Animation.DROP,
-            optimized: false // Allow CSS animations
-        });
-
-        // Add hover effect
-        marker.addListener('mouseover', () => {
-            marker.setIcon({
-                ...icon,
-                scale: 13
-            });
-        });
-
-        marker.addListener('mouseout', () => {
-            marker.setIcon(icon);
-        });
+        const marker = new mapboxgl.Marker(el)
+            .setLngLat([location.lng, location.lat])
+            .addTo(map);
 
         // Add click event
-        marker.addListener('click', () => {
+        el.addEventListener('click', () => {
             showLocationDetails(location);
-            map.panTo(marker.getPosition());
-            map.setZoom(14);
+            map.flyTo({
+                center: [location.lng, location.lat],
+                zoom: 14,
+                duration: 1500
+            });
         });
 
         // Store marker reference
@@ -154,9 +136,9 @@ function addMarkers() {
 function filterMarkers() {
     markers.forEach(({ marker, location }) => {
         if (currentFilter === 'all' || location.brand === currentFilter) {
-            marker.setVisible(true);
+            marker.getElement().style.display = 'block';
         } else {
-            marker.setVisible(false);
+            marker.getElement().style.display = 'none';
         }
     });
 }
@@ -190,5 +172,9 @@ function showLocationDetails(location) {
     panel.classList.add('active');
 }
 
-// Make initMap globally accessible for Google Maps callback
-window.initMap = initMap;
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+} else {
+    initMap();
+}
