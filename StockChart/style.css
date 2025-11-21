@@ -788,6 +788,12 @@ body {
   animation: pulse-orange 2s ease-in-out infinite;
 }
 
+.market-dot.opening-soon {
+  background-color: #ff9800;
+  color: #ff9800;
+  animation: pulse-orange 2s ease-in-out infinite;
+}
+
 .market-dot.closed {
   background-color: #fa709a;
   color: #fa709a;

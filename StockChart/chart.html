@@ -284,7 +284,7 @@
                   stockData[symbol] = {
                     symbol: symbol,
                     price: price.toFixed(2),
-                    changePercent: change !== undefined && change !== null && !isNaN(change) ? change.toFixed(2) : '–',
+                    changePercent: change !== undefined && change !== null && !isNaN(change) ? change.toFixed(2) : '',
                     isPositive: change > 0,
                     isNegative: change < 0
                   };
@@ -336,7 +336,7 @@
                 changeEl.textContent = `${stockInfo.changePercent}%`;
               } else {
                 changeEl.classList.add('neutral');
-                changeEl.textContent = stockInfo.changePercent === '–' ? '–' : `${stockInfo.changePercent}%`;
+                changeEl.textContent = stockInfo.changePercent === '' ? '' : `${stockInfo.changePercent}%`;
               }
 
               item.appendChild(symbolEl);
@@ -368,7 +368,7 @@
                 changeEl.textContent = `${stockInfo.changePercent}%`;
               } else {
                 changeEl.classList.add('neutral');
-                changeEl.textContent = stockInfo.changePercent === '–' ? '–' : `${stockInfo.changePercent}%`;
+                changeEl.textContent = stockInfo.changePercent === '' ? '' : `${stockInfo.changePercent}%`;
               }
               item.appendChild(symbolEl);
               item.appendChild(priceEl);
