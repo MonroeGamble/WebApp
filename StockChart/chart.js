@@ -555,6 +555,7 @@ async function addTicker(ticker) {
     updateChart();
     updateTable(); // Update table with new ticker
     clearInput();
+    updateLastUpdatedTimestamp(); // Update timestamp
 
     console.log(`✓ Added ${ticker} to chart`);
 
@@ -876,6 +877,7 @@ async function changeTimeRange(range) {
       }
 
       updateChart();
+      updateLastUpdatedTimestamp(); // Update timestamp
       console.log(`✓ Loaded ${range} data for all tickers`);
 
     } catch (error) {
@@ -1074,6 +1076,18 @@ function formatTime(date) {
   hours = hours ? hours : 12;
 
   return `${hours}:${minutes}:${seconds} ${ampm}`;
+}
+
+/**
+ * Update the last updated timestamp display
+ */
+function updateLastUpdatedTimestamp() {
+  const lastUpdatedEl = document.getElementById('chart-last-updated');
+  if (lastUpdatedEl) {
+    const now = new Date();
+    const timeStr = formatTime(now);
+    lastUpdatedEl.textContent = timeStr.split(' ')[0]; // Just time, not AM/PM
+  }
 }
 
 /**

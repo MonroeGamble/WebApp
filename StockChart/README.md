@@ -345,7 +345,7 @@ This widget is provided as-is for educational and personal use.
 
 ---
 
-**Built for FranchiseIQ** - Professional stock analysis for the franchise industry
+**Built for FranResearch** - Professional stock analysis for the franchise industry
 
 **Version:** 1.0
 **Last Updated:** November 2024

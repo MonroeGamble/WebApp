@@ -148,16 +148,28 @@ async function fetchStockData() {
 
 /**
  * Generate fallback data when API is unavailable
+ * Uses last known prices or reasonable defaults
  * @returns {Object} Fallback stock data
  */
 function getFallbackData() {
   const fallbackData = {};
 
+  // If we have cached data, use it
+  if (Object.keys(lastKnownData).length > 0) {
+    return lastKnownData;
+  }
+
+  // If we have last market data, use it
+  if (Object.keys(lastMarketData).length > 0) {
+    return lastMarketData;
+  }
+
+  // Last resort: return placeholder showing "Loading..."
   TICKER_SYMBOLS.forEach(symbol => {
     fallbackData[symbol] = {
       symbol: symbol,
-      price: 'N/A',
-      changePercent: '–',
+      price: '---',
+      changePercent: '---',
       isPositive: false,
       isNegative: false
     };
@@ -244,12 +256,20 @@ async function updateTicker() {
   const etTime = getEasternTime();
   const marketOpen = isMarketOpen(etTime);
   const closingMessageEl = document.getElementById('closing-message');
+  const lastUpdatedEl = document.getElementById('last-updated');
 
   if (marketOpen) {
     // Market is open: fetch fresh data
     const stockData = await fetchStockData();
     renderTicker(stockData);
     resetCountdown(); // Reset countdown after refresh
+
+    // Update last updated timestamp
+    if (lastUpdatedEl) {
+      const now = new Date();
+      const timeStr = formatTime(now);
+      lastUpdatedEl.textContent = timeStr.split(' ')[0]; // Just time, not AM/PM
+    }
 
     // Hide closing message during market hours
     if (closingMessageEl) {
@@ -262,9 +282,20 @@ async function updateTicker() {
       const stockData = await fetchStockData();
       lastMarketData = stockData;
       renderTicker(stockData);
+
+      // Update timestamp
+      if (lastUpdatedEl) {
+        const now = new Date();
+        lastUpdatedEl.textContent = formatTime(now).split(' ')[0];
+      }
     } else {
       // Use cached after-hours data
       renderTicker(lastMarketData);
+
+      // Show when data was last fetched (from cache)
+      if (lastUpdatedEl) {
+        lastUpdatedEl.textContent = 'Cached';
+      }
     }
 
     // Show closing message when market is closed

@@ -673,6 +673,18 @@ body {
   border-radius: 6px;
 }
 
+.last-updated-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 15px;
+  border-radius: 6px;
+}
+
 .market-dot {
   width: 12px;
   height: 12px;
