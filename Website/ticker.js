@@ -4,6 +4,7 @@
 // ============================================================================
 // Modify this array to add or remove ticker symbols
 const TICKER_SYMBOLS = [
+  "^GSPC", "^IXIC", "^DJI", // Market Indices
   "MCD", "YUM", "QSR", "WEN", "DPZ", "JACK", "WING", "SHAK", "CAVA",
   "DENN", "DIN", "DNUT", "NATH", "RRGB",
   "DRVN", "HRB", "CAR", "UHAL",
@@ -17,11 +18,12 @@ const TICKER_SYMBOLS = [
   "TAST"
 ];
 
-// Refresh interval in milliseconds (60 seconds)
-const REFRESH_INTERVAL = 60000;
+// Refresh interval in milliseconds (15 minutes = 900 seconds)
+const REFRESH_INTERVAL = 900000; // 15 minutes
 
 // Cache for last known prices (for offline fallback)
 let lastKnownData = {};
+let lastMarketData = {}; // Store last market close data for after-hours
 
 // ============================================================================
 // YAHOO FINANCE API INTEGRATION
@@ -78,20 +80,41 @@ async function fetchStockData() {
 
       quotes.forEach(quote => {
         const symbol = quote.symbol;
-        const price = quote.regularMarketPrice;
-        const change = quote.regularMarketChangePercent;
+
+        // Use appropriate price based on market status
+        const etTime = getEasternTime();
+        const marketOpen = isMarketOpen(etTime);
+
+        let price, change;
+
+        if (marketOpen) {
+          // During market hours: use regular market price
+          price = quote.regularMarketPrice;
+          change = quote.regularMarketChangePercent;
+        } else {
+          // After hours: use previous close (adjusted close if available)
+          price = quote.regularMarketPreviousClose || quote.regularMarketPrice;
+          change = quote.regularMarketChangePercent;
+        }
 
         stockData[symbol] = {
           symbol: symbol,
           price: price !== undefined && price !== null ? price.toFixed(2) : 'N/A',
           changePercent: change !== undefined && change !== null ? change.toFixed(2) : '–',
           isPositive: change > 0,
-          isNegative: change < 0
+          isNegative: change < 0,
+          afterHours: !marketOpen
         };
       });
 
       // Update cache with successful data
       lastKnownData = stockData;
+
+      // Store as last market data if we have valid data
+      if (!isMarketOpen(getEasternTime())) {
+        lastMarketData = stockData;
+      }
+
       console.log(`✓ Successfully fetched data for ${Object.keys(stockData).length} stocks`);
       return stockData;
 
@@ -218,9 +241,26 @@ function renderTicker(stockData) {
  * Update the ticker with fresh data
  */
 async function updateTicker() {
-  const stockData = await fetchStockData();
-  renderTicker(stockData);
-  resetCountdown(); // Reset countdown after refresh
+  const etTime = getEasternTime();
+  const marketOpen = isMarketOpen(etTime);
+
+  if (marketOpen) {
+    // Market is open: fetch fresh data
+    const stockData = await fetchStockData();
+    renderTicker(stockData);
+    resetCountdown(); // Reset countdown after refresh
+  } else {
+    // Market is closed: use last known data or fetch once for previous close
+    if (Object.keys(lastMarketData).length === 0) {
+      // Fetch once to get previous close data
+      const stockData = await fetchStockData();
+      lastMarketData = stockData;
+      renderTicker(stockData);
+    } else {
+      // Use cached after-hours data
+      renderTicker(lastMarketData);
+    }
+  }
 }
 
 // ============================================================================
@@ -228,7 +268,7 @@ async function updateTicker() {
 // ============================================================================
 
 // Countdown tracking
-let countdownSeconds = 60;
+let countdownSeconds = 900; // 15 minutes
 let countdownInterval = null;
 
 /**
@@ -316,25 +356,31 @@ function updateCountdown() {
   const countdownElement = document.getElementById('countdown');
 
   if (countdownElement) {
-    countdownElement.textContent = `${countdownSeconds}s`;
+    const minutes = Math.floor(countdownSeconds / 60);
+    const seconds = countdownSeconds % 60;
+    countdownElement.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
   }
 
-  countdownSeconds--;
+  // Only decrement if market is open
+  const etTime = getEasternTime();
+  if (isMarketOpen(etTime)) {
+    countdownSeconds--;
 
-  // When countdown reaches 0, it will be reset by the refresh
-  if (countdownSeconds < 0) {
-    countdownSeconds = 0;
+    // When countdown reaches 0, it will be reset by the refresh
+    if (countdownSeconds < 0) {
+      countdownSeconds = 0;
+    }
   }
 }
 
 /**
- * Reset countdown to 60 seconds
+ * Reset countdown to 15 minutes
  */
 function resetCountdown() {
-  countdownSeconds = 60;
+  countdownSeconds = 900; // 15 minutes
   const countdownElement = document.getElementById('countdown');
   if (countdownElement) {
-    countdownElement.textContent = '60s';
+    countdownElement.textContent = '15:00';
   }
 }
 

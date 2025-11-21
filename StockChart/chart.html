@@ -63,6 +63,7 @@
         <div class="control-group inline-controls">
             <button id="reset-zoom-btn" class="btn btn-secondary">Reset Zoom</button>
             <button id="toggle-legend-btn" class="btn btn-secondary">Toggle Legend</button>
+            <button id="toggle-year-markers-btn" class="btn btn-secondary">Toggle Year Markers</button>
             <button id="refresh-btn" class="btn btn-secondary">Refresh Data</button>
         </div>
     </div>
@@ -76,6 +77,33 @@
     <!-- Chart Container -->
     <div class="chart-wrapper">
         <canvas id="stock-chart"></canvas>
+    </div>
+
+    <!-- Table View -->
+    <div class="table-container">
+        <h2>Stock Data Table</h2>
+        <div class="table-wrapper">
+            <table id="stock-data-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Current Price</th>
+                        <th>Change %</th>
+                        <th>Volume</th>
+                        <th>Market Cap</th>
+                        <th>52 Week High</th>
+                        <th>52 Week Low</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: #999;">
+                            Add tickers to see data in the table
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Ticker Settings Modal -->

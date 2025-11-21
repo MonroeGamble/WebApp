@@ -5,7 +5,7 @@
 
 // Configuration
 const MAX_TICKERS = 10;
-const DEFAULT_TICKERS = ['MCD', 'YUM', 'QSR'];
+const DEFAULT_TICKERS = ['^GSPC', 'MCD', 'YUM', 'QSR', 'WEN', 'DPZ', 'MAR', 'HLT', 'PLNT', 'DNUT'];
 const CORS_PROXIES = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -18,14 +18,66 @@ let chartInstance = null;
 let currentRange = 'ytd';
 let activeTickers = new Map(); // ticker -> {color, width, data}
 let showLegend = true;
+let showYearMarkers = true; // Toggle for year-end markers
 let currentModal = null;
 
-// Color Palette for auto-assignment
+// Color Palette for auto-assignment (^GSPC gets black, others get colors)
 const COLOR_PALETTE = [
   '#667eea', '#764ba2', '#f093fb', '#4facfe',
   '#43e97b', '#fa709a', '#fee140', '#30cfd0',
   '#a8edea', '#fed6e3'
 ];
+
+// ============================================================================
+// YAHOO FINANCE API - CHART DATA WITH ADJUSTED CLOSE
+// ============================================================================
+
+/**
+ * Fetch current quote data for table display
+ */
+async function fetchQuoteData(ticker) {
+  const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    const proxy = CORS_PROXIES[i];
+    const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
+
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.quoteResponse || !data.quoteResponse.result || data.quoteResponse.result.length === 0) {
+        throw new Error('Invalid response structure');
+      }
+
+      const quote = data.quoteResponse.result[0];
+
+      return {
+        symbol: quote.symbol,
+        price: quote.regularMarketPrice || 0,
+        change: quote.regularMarketChangePercent || 0,
+        volume: quote.regularMarketVolume || 0,
+        marketCap: quote.marketCap || 0,
+        fiftyTwoWeekHigh: quote.fiftyTwoWeekHigh || 0,
+        fiftyTwoWeekLow: quote.fiftyTwoWeekLow || 0
+      };
+
+    } catch (error) {
+      console.error(`Proxy ${i + 1} failed for quote ${ticker}:`, error.message);
+
+      if (i < CORS_PROXIES.length - 1) {
+        continue;
+      }
+
+      throw new Error(`Failed to fetch quote for ${ticker}`);
+    }
+  }
+}
 
 // ============================================================================
 // YAHOO FINANCE API - CHART DATA WITH ADJUSTED CLOSE
@@ -142,20 +194,29 @@ async function addTicker(ticker) {
     // Fetch data
     const chartData = await fetchChartData(ticker, currentRange);
 
-    // Auto-assign color
-    const colorIndex = activeTickers.size % COLOR_PALETTE.length;
-    const color = COLOR_PALETTE[colorIndex];
+    // Special handling for ^GSPC (S&P 500) - thick black line as baseline
+    let color, width;
+    if (ticker === '^GSPC') {
+      color = '#000000'; // Black
+      width = 3; // Thicker line
+    } else {
+      // Auto-assign color from palette
+      const colorIndex = activeTickers.size % COLOR_PALETTE.length;
+      color = COLOR_PALETTE[colorIndex];
+      width = 2;
+    }
 
     // Store ticker data
     activeTickers.set(ticker, {
       color: color,
-      width: 2,
+      width: width,
       data: chartData
     });
 
     // Update UI
     renderTickerChip(ticker);
     updateChart();
+    updateTable(); // Update table with new ticker
     clearInput();
 
     console.log(`✓ Added ${ticker} to chart`);
@@ -176,6 +237,7 @@ function removeTicker(ticker) {
     activeTickers.delete(ticker);
     updateChart();
     renderAllTickerChips();
+    updateTable(); // Update table after removing ticker
     console.log(`✓ Removed ${ticker} from chart`);
   }
 }
@@ -272,8 +334,13 @@ function updateChart() {
           position: 'top',
           labels: {
             usePointStyle: true,
-            padding: 15,
-            font: { size: 12 }
+            padding: 20,
+            font: {
+              size: 16,
+              weight: '600'
+            },
+            boxWidth: 15,
+            boxHeight: 15
           }
         },
         tooltip: {
@@ -341,11 +408,31 @@ function updateChart() {
             }
           },
           grid: {
-            display: false
+            display: showYearMarkers,
+            color: function(context) {
+              // Show year-end markers as dashed vertical lines
+              if (!showYearMarkers) return 'transparent';
+
+              const date = new Date(context.tick.value);
+              const month = date.getMonth();
+              const day = date.getDate();
+
+              // Check if it's near year-end (December 31st)
+              if (month === 11 && day >= 28) {
+                return 'rgba(150, 150, 150, 0.3)';
+              }
+              return 'transparent';
+            },
+            borderDash: [5, 5],
+            lineWidth: 1
           },
           ticks: {
             maxRotation: 0,
-            autoSkipPadding: 20
+            autoSkipPadding: 20,
+            font: {
+              size: 14,
+              weight: '500'
+            }
           }
         },
         y: {
@@ -354,6 +441,10 @@ function updateChart() {
             color: 'rgba(0, 0, 0, 0.05)'
           },
           ticks: {
+            font: {
+              size: 14,
+              weight: '500'
+            },
             callback: function(value) {
               return '$' + value.toFixed(2);
             }
@@ -507,6 +598,88 @@ function closeModal() {
   currentModal = null;
 }
 
+/**
+ * Update stock data table
+ */
+async function updateTable() {
+  const tableBody = document.getElementById('table-body');
+
+  if (activeTickers.size === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align: center; padding: 20px; color: #999;">
+          Add tickers to see data in the table
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Loading...</td></tr>';
+
+  const rows = [];
+
+  for (const ticker of activeTickers.keys()) {
+    try {
+      const quote = await fetchQuoteData(ticker);
+
+      const changeClass = quote.change > 0 ? 'positive-change' : (quote.change < 0 ? 'negative-change' : '');
+      const changeSign = quote.change > 0 ? '+' : '';
+
+      rows.push(`
+        <tr>
+          <td>${quote.symbol}</td>
+          <td>$${quote.price.toFixed(2)}</td>
+          <td class="${changeClass}">${changeSign}${quote.change.toFixed(2)}%</td>
+          <td>${formatNumber(quote.volume)}</td>
+          <td>${formatMarketCap(quote.marketCap)}</td>
+          <td>$${quote.fiftyTwoWeekHigh.toFixed(2)}</td>
+          <td>$${quote.fiftyTwoWeekLow.toFixed(2)}</td>
+        </tr>
+      `);
+    } catch (error) {
+      console.error(`Failed to fetch quote for ${ticker}:`, error);
+      rows.push(`
+        <tr>
+          <td>${ticker}</td>
+          <td colspan="6" style="color: #fa709a;">Error loading data</td>
+        </tr>
+      `);
+    }
+  }
+
+  tableBody.innerHTML = rows.join('');
+}
+
+/**
+ * Format large numbers (volume)
+ */
+function formatNumber(num) {
+  if (num >= 1000000000) {
+    return (num / 1000000000).toFixed(2) + 'B';
+  } else if (num >= 1000000) {
+    return (num / 1000000).toFixed(2) + 'M';
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(2) + 'K';
+  }
+  return num.toString();
+}
+
+/**
+ * Format market cap
+ */
+function formatMarketCap(num) {
+  if (num === 0) return 'N/A';
+  if (num >= 1000000000000) {
+    return '$' + (num / 1000000000000).toFixed(2) + 'T';
+  } else if (num >= 1000000000) {
+    return '$' + (num / 1000000000).toFixed(2) + 'B';
+  } else if (num >= 1000000) {
+    return '$' + (num / 1000000).toFixed(2) + 'M';
+  }
+  return '$' + num.toString();
+}
+
 // ============================================================================
 // EVENT HANDLERS
 // ============================================================================
@@ -557,6 +730,11 @@ function initEventListeners() {
       chartInstance.options.plugins.legend.display = showLegend;
       chartInstance.update();
     }
+  });
+
+  document.getElementById('toggle-year-markers-btn').addEventListener('click', () => {
+    showYearMarkers = !showYearMarkers;
+    updateChart(); // Need to recreate chart to update grid display
   });
 
   document.getElementById('refresh-btn').addEventListener('click', () => {
