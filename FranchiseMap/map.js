@@ -1,5 +1,6 @@
 // ============================================================================
 // FRANCHISE LOCATION MAP - Google Maps Version
+// FRANCHISE LOCATION MAP - GOOGLE MAPS
 // Using Google Maps JavaScript API
 // ============================================================================
 
@@ -53,6 +54,7 @@ let currentFilter = 'all';
 let infoWindow;
 
 // Initialize map (called by Google Maps API callback)
+// Initialize map
 function initMap() {
     // Create map centered on US
     map = new google.maps.Map(document.getElementById('map'), {
@@ -61,6 +63,7 @@ function initMap() {
         mapTypeControl: true,
         mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
             position: google.maps.ControlPosition.TOP_RIGHT
         },
         streetViewControl: true,
@@ -70,6 +73,7 @@ function initMap() {
         zoomControl: true,
         zoomControlOptions: {
             position: google.maps.ControlPosition.RIGHT_BOTTOM
+            position: google.maps.ControlPosition.RIGHT_TOP
         },
         fullscreenControl: true,
         fullscreenControlOptions: {
@@ -81,6 +85,17 @@ function initMap() {
                 featureType: 'poi',
                 elementType: 'labels',
                 stylers: [{ visibility: 'on' }]
+        zoomControl: true,
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_CENTER
+        },
+        gestureHandling: 'greedy', // Allow single-finger pan on mobile
+        styles: [
+            // Subtle custom styling
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }] // Hide POI labels for cleaner look
             }
         ]
     });
@@ -100,6 +115,7 @@ function initMap() {
     // Handle close panel button
     document.getElementById('close-panel').addEventListener('click', () => {
         document.getElementById('info-panel').classList.remove('active');
+        infoWindow.close();
     });
 }
 
@@ -136,6 +152,23 @@ function addMarkers() {
 
         marker.addListener('mouseout', () => {
             marker.setIcon(icon);
+        // Create custom marker icon
+        const icon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: location.color,
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 3,
+            scale: 10
+        };
+
+        // Create marker
+        const marker = new google.maps.Marker({
+            position: { lat: location.lat, lng: location.lng },
+            map: map,
+            title: location.name,
+            icon: icon,
+            animation: google.maps.Animation.DROP
         });
 
         // Add click event
@@ -143,6 +176,34 @@ function addMarkers() {
             showLocationDetails(location);
             map.panTo(marker.getPosition());
             map.setZoom(14);
+
+            // Pan to marker and zoom in slightly
+            map.panTo(marker.getPosition());
+            if (map.getZoom() < 14) {
+                map.setZoom(14);
+            }
+
+            // Show info window
+            infoWindow.setContent(`
+                <div style="padding: 10px;">
+                    <h3 style="margin: 0 0 8px 0; color: #333; font-size: 1.1em;">${location.name}</h3>
+                    <p style="margin: 4px 0; color: #666; font-size: 0.95em;"><strong>Brand:</strong> ${location.brand}</p>
+                    <p style="margin: 4px 0; color: #666; font-size: 0.95em;">${location.address}</p>
+                </div>
+            `);
+            infoWindow.open(map, marker);
+        });
+
+        // Hover effect
+        marker.addListener('mouseover', () => {
+            marker.setIcon({
+                ...icon,
+                scale: 13
+            });
+        });
+
+        marker.addListener('mouseout', () => {
+            marker.setIcon(icon);
         });
 
         // Store marker reference
@@ -159,6 +220,10 @@ function filterMarkers() {
             marker.setVisible(false);
         }
     });
+
+    // Close info window and panel when filtering
+    infoWindow.close();
+    document.getElementById('info-panel').classList.remove('active');
 }
 
 // Show location details in panel
@@ -192,3 +257,23 @@ function showLocationDetails(location) {
 
 // Make initMap globally accessible for Google Maps callback
 window.initMap = initMap;
+// Handle window errors gracefully
+window.gm_authFailure = function() {
+    document.getElementById('map').innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; padding: 40px; text-align: center;">
+            <div>
+                <h2 style="color: #333; margin-bottom: 15px;">⚠️ Google Maps API Key Required</h2>
+                <p style="color: #666; margin-bottom: 10px;">To use this map, you need a Google Maps API key.</p>
+                <p style="color: #666; margin-bottom: 20px;">
+                    <strong>Get a free API key at:</strong><br>
+                    <a href="https://developers.google.com/maps/gmp-get-started" target="_blank" style="color: #667eea;">
+                        https://developers.google.com/maps/gmp-get-started
+                    </a>
+                </p>
+                <p style="color: #666; font-size: 0.9em;">
+                    Replace YOUR_API_KEY in map.html with your actual key.
+                </p>
+            </div>
+        </div>
+    `;
+};

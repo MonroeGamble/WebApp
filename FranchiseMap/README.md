@@ -1,6 +1,6 @@
 # Interactive Franchise Map
 
-An interactive map showing franchise locations across North America using Mapbox GL JS and OpenStreetMap.
+An interactive map showing franchise locations across North America using Google Maps JavaScript API.
 
 ## Features
 
@@ -9,27 +9,29 @@ An interactive map showing franchise locations across North America using Mapbox
 - 🎨 Color-coded by franchise category
 - 🔍 Brand filtering
 - 📱 Mobile responsive with touch controls
-- 🌐 Built on Mapbox and OpenStreetMap
+- 🌐 Built on Google Maps with Street View and satellite imagery
 
 ## Setup Instructions
 
-### 1. Get a Free Mapbox API Token
+### 1. Get a Google Maps API Key
 
-1. Visit https://account.mapbox.com/
-2. Sign up for a free account (no credit card required)
-3. Navigate to "Access tokens" page
-4. Copy your default public token OR create a new one
+1. Visit https://developers.google.com/maps/gmp-get-started
+2. Sign up for a Google Cloud account (free trial includes $300 credit)
+3. Enable the Maps JavaScript API in your project
+4. Create an API key from the Credentials page
+5. Restrict your API key to specific URLs for security
 
 **Free Tier Limits:**
-- 50,000 map loads per month
+- $200 monthly credit (~28,000+ map loads)
+- No credit card required for initial setup
 - Perfect for personal and small business use
 
-### 2. Add Your Token
+### 2. Add Your API Key
 
-Open `FranchiseMap/map.js` and replace the placeholder token on line 7:
+Open `FranchiseMap/map.html` and replace YOUR_API_KEY on line 79:
 
-```javascript
-mapboxgl.accessToken = 'YOUR_TOKEN_HERE';
+```html
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
 ```
 
 ### 3. Deploy
@@ -66,20 +68,17 @@ Edit the `franchiseLocations` array in `map.js`:
 - `Fitness` - Fitness/Wellness (Green: #96ceb4)
 - `Service` - Business Services (Orange: #ffa07a)
 
-### Map Styles
+### Map Types
 
-Change the map style on line 17 of `map.js`:
+Google Maps includes built-in map types accessible via the map type control:
 
-```javascript
-style: 'mapbox://styles/mapbox/streets-v12'
-```
+Available map types:
+- **Roadmap** - Default street map view
+- **Satellite** - Satellite imagery
+- **Hybrid** - Satellite imagery with road overlay
+- **Terrain** - Topographic features and elevation
 
-Available styles:
-- `streets-v12` - Default street map
-- `satellite-v9` - Satellite imagery
-- `outdoors-v12` - Outdoor/terrain
-- `light-v11` - Light theme
-- `dark-v11` - Dark theme
+Users can switch between these using the map type control in the top-right corner.
 
 ## Embedding
 
@@ -103,22 +102,23 @@ Available styles:
 
 ## Technical Details
 
-- **Mapbox GL JS**: v3.0.1
-- **OpenStreetMap**: Base map data
+- **Google Maps JavaScript API**: Latest version
+- **Google Street View**: Integrated street-level imagery
 - **No backend required**: Fully client-side
 - **Mobile-optimized**: Touch controls, responsive design
+- **Built-in controls**: Zoom, street view, fullscreen, map type selector
 
 ## Attribution
 
-As required by Mapbox and OpenStreetMap:
-- © Mapbox
-- © OpenStreetMap contributors
+As required by Google Maps:
+- © Google
+- Map data attribution is automatically included by Google Maps
 
 ## Support
 
 For issues or questions:
-1. Check Mapbox documentation: https://docs.mapbox.com/
-2. OpenStreetMap wiki: https://wiki.openstreetmap.org/
+1. Check Google Maps documentation: https://developers.google.com/maps/documentation/javascript
+2. Google Maps Platform Support: https://support.google.com/maps
 
 ## License
 
