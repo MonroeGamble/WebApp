@@ -18,8 +18,8 @@ const TICKER_SYMBOLS = [
   "TAST"
 ];
 
-// Refresh interval in milliseconds (15 minutes = 900 seconds)
-const REFRESH_INTERVAL = 900000; // 15 minutes
+// Refresh interval in milliseconds (1 hour = 3600 seconds)
+const REFRESH_INTERVAL = 3600000; // 1 hour
 
 // Cache for last known prices (for offline fallback)
 let lastKnownData = {};
@@ -243,12 +243,18 @@ function renderTicker(stockData) {
 async function updateTicker() {
   const etTime = getEasternTime();
   const marketOpen = isMarketOpen(etTime);
+  const closingMessageEl = document.getElementById('closing-message');
 
   if (marketOpen) {
     // Market is open: fetch fresh data
     const stockData = await fetchStockData();
     renderTicker(stockData);
     resetCountdown(); // Reset countdown after refresh
+
+    // Hide closing message during market hours
+    if (closingMessageEl) {
+      closingMessageEl.style.display = 'none';
+    }
   } else {
     // Market is closed: use last known data or fetch once for previous close
     if (Object.keys(lastMarketData).length === 0) {
@@ -260,6 +266,11 @@ async function updateTicker() {
       // Use cached after-hours data
       renderTicker(lastMarketData);
     }
+
+    // Show closing message when market is closed
+    if (closingMessageEl) {
+      closingMessageEl.style.display = 'block';
+    }
   }
 }
 
@@ -268,7 +279,7 @@ async function updateTicker() {
 // ============================================================================
 
 // Countdown tracking
-let countdownSeconds = 900; // 15 minutes
+let countdownSeconds = 3600; // 1 hour
 let countdownInterval = null;
 
 /**
@@ -374,13 +385,13 @@ function updateCountdown() {
 }
 
 /**
- * Reset countdown to 15 minutes
+ * Reset countdown to 1 hour
  */
 function resetCountdown() {
-  countdownSeconds = 900; // 15 minutes
+  countdownSeconds = 3600; // 1 hour
   const countdownElement = document.getElementById('countdown');
   if (countdownElement) {
-    countdownElement.textContent = '15:00';
+    countdownElement.textContent = '60:00';
   }
 }
 

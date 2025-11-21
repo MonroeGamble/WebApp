@@ -1248,7 +1248,7 @@ function initEventListeners() {
  * Initialize the application
  */
 async function init() {
-  console.log('Initializing FranchiseIQ Interactive Stock Chart...');
+  console.log('Initializing FranResearch Interactive Stock Chart...');
 
   // Start clock and market status
   startClock();
