@@ -30,7 +30,7 @@ jobs:
 
       - name: Fetch live ticker data from Finnhub
         env:
-          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB }}
         run: |
           python scripts/fetch_live_ticker_finnhub.py
 
