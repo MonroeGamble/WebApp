@@ -16,9 +16,10 @@ const CORS_PROXIES = [
 // State Management
 let chartInstance = null;
 let currentRange = 'ytd';
-let activeTickers = new Map(); // ticker -> {color, width, data}
+let activeTickers = new Map(); // ticker -> {color, width, data, rawData}
 let showLegend = true;
 let showYearMarkers = true; // Toggle for year-end markers
+let displayMode = 'percent'; // 'percent' or 'price'
 let currentModal = null;
 
 // Color Palette for auto-assignment (^GSPC gets black, others get colors)
@@ -27,6 +28,128 @@ const COLOR_PALETTE = [
   '#43e97b', '#fa709a', '#fee140', '#30cfd0',
   '#a8edea', '#fed6e3'
 ];
+
+// ============================================================================
+// CSV DATA LOADING
+// ============================================================================
+
+/**
+ * Load historical data from CSV file
+ * @param {string} ticker - Stock symbol
+ * @returns {Promise<Array>} Array of historical data points
+ */
+async function loadHistoricalDataFromCSV(ticker) {
+  try {
+    const response = await fetch('../data/franchise_stocks.csv');
+
+    if (!response.ok) {
+      console.log(`CSV file not found, will fetch all data from API`);
+      return null;
+    }
+
+    const csvText = await response.text();
+    const lines = csvText.split('\n');
+
+    // Parse CSV header
+    const headers = lines[0].split(',');
+
+    // Find data for this ticker
+    const tickerData = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const values = line.split(',');
+      const row = {};
+
+      headers.forEach((header, index) => {
+        row[header.trim()] = values[index];
+      });
+
+      // Check if this row is for our ticker
+      if (row.symbol === ticker) {
+        tickerData.push({
+          x: new Date(row.date),
+          y: parseFloat(row.adjClose)
+        });
+      }
+    }
+
+    if (tickerData.length > 0) {
+      console.log(`✓ Loaded ${tickerData.length} historical records for ${ticker} from CSV`);
+      return tickerData;
+    }
+
+    return null;
+
+  } catch (error) {
+    console.error(`Error loading CSV data for ${ticker}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fetch today's data from API
+ * @param {string} ticker - Stock symbol
+ * @returns {Promise<Array>} Array with today's data point(s)
+ */
+async function fetchTodayData(ticker) {
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1d&interval=1d`;
+
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    const proxy = CORS_PROXIES[i];
+    const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
+
+    try {
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
+        throw new Error('Invalid response structure');
+      }
+
+      const result = data.chart.result[0];
+      const timestamps = result.timestamp;
+      const indicators = result.indicators;
+
+      // Get adjusted close prices
+      let prices;
+      if (indicators.adjclose && indicators.adjclose[0]) {
+        prices = indicators.adjclose[0].adjclose;
+      } else {
+        prices = indicators.quote[0].close;
+      }
+
+      // Get today's data
+      const todayData = [];
+      for (let i = 0; i < timestamps.length; i++) {
+        if (prices[i] !== null && prices[i] !== undefined) {
+          todayData.push({
+            x: new Date(timestamps[i] * 1000),
+            y: prices[i]
+          });
+        }
+      }
+
+      console.log(`✓ Fetched ${todayData.length} data points for ${ticker} from API`);
+      return todayData;
+
+    } catch (error) {
+      if (i < CORS_PROXIES.length - 1) {
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  return [];
+}
 
 // ============================================================================
 // YAHOO FINANCE API - CHART DATA WITH ADJUSTED CLOSE
@@ -85,74 +208,287 @@ async function fetchQuoteData(ticker) {
 
 /**
  * Fetch historical chart data with adjusted close prices
+ * Loads from CSV when available, falls back to API
  */
 async function fetchChartData(ticker, range) {
-  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=${range}&interval=1d`;
+  try {
+    // Try to load historical data from CSV first
+    let historicalData = await loadHistoricalDataFromCSV(ticker);
 
-  for (let i = 0; i < CORS_PROXIES.length; i++) {
-    const proxy = CORS_PROXIES[i];
-    const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
+    // If CSV data exists, merge with today's data from API
+    if (historicalData && historicalData.length > 0) {
+      console.log(`Using CSV data for ${ticker}, fetching today's update...`);
 
-    try {
-      console.log(`Fetching ${ticker} via proxy ${i + 1}...`);
+      try {
+        const todayData = await fetchTodayData(ticker);
 
-      const response = await fetch(url);
+        // Merge historical and today's data
+        const mergedData = [...historicalData];
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
+        // Add today's data if it doesn't overlap
+        if (todayData && todayData.length > 0) {
+          const lastHistoricalDate = new Date(historicalData[historicalData.length - 1].x);
+          const todayDate = new Date(todayData[0].x);
 
-      const data = await response.json();
-
-      if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
-        throw new Error('Invalid response structure');
-      }
-
-      const result = data.chart.result[0];
-      const timestamps = result.timestamp;
-      const indicators = result.indicators;
-
-      // Get adjusted close prices (CRITICAL for accurate analysis)
-      let prices;
-      if (indicators.adjclose && indicators.adjclose[0]) {
-        prices = indicators.adjclose[0].adjclose;
-        console.log(`✓ Using adjusted close for ${ticker}`);
-      } else {
-        // Fallback to regular close if adjusted not available
-        prices = indicators.quote[0].close;
-        console.warn(`⚠ Using regular close for ${ticker} (adjusted not available)`);
-      }
-
-      // Filter out null values
-      const chartData = [];
-      for (let i = 0; i < timestamps.length; i++) {
-        if (prices[i] !== null && prices[i] !== undefined) {
-          chartData.push({
-            x: new Date(timestamps[i] * 1000),
-            y: prices[i]
-          });
+          // Only add if today's data is newer
+          if (todayDate > lastHistoricalDate) {
+            mergedData.push(...todayData);
+          }
         }
+
+        // Filter to requested range
+        const filteredData = filterDataByRange(mergedData, range);
+
+        return {
+          symbol: ticker,
+          data: filteredData,
+          meta: { fromCSV: true }
+        };
+
+      } catch (error) {
+        console.warn(`Could not fetch today's data, using CSV only: ${error.message}`);
+
+        const filteredData = filterDataByRange(historicalData, range);
+
+        return {
+          symbol: ticker,
+          data: filteredData,
+          meta: { fromCSV: true }
+        };
       }
-
-      console.log(`✓ Fetched ${chartData.length} data points for ${ticker}`);
-
-      return {
-        symbol: ticker,
-        data: chartData,
-        meta: result.meta
-      };
-
-    } catch (error) {
-      console.error(`Proxy ${i + 1} failed for ${ticker}:`, error.message);
-
-      if (i < CORS_PROXIES.length - 1) {
-        console.log('Trying next proxy...');
-        continue;
-      }
-
-      throw new Error(`Failed to fetch data for ${ticker}: ${error.message}`);
     }
+
+    // Fallback: Fetch all data from API if CSV not available
+    console.log(`CSV not available for ${ticker}, fetching from API...`);
+
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=${range}&interval=1d`;
+
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const proxy = CORS_PROXIES[i];
+      const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
+
+      try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.chart || !data.chart.result || data.chart.result.length === 0) {
+          throw new Error('Invalid response structure');
+        }
+
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp;
+        const indicators = result.indicators;
+
+        // Get adjusted close prices
+        let prices;
+        if (indicators.adjclose && indicators.adjclose[0]) {
+          prices = indicators.adjclose[0].adjclose;
+          console.log(`✓ Using adjusted close for ${ticker}`);
+        } else {
+          prices = indicators.quote[0].close;
+          console.warn(`⚠ Using regular close for ${ticker} (adjusted not available)`);
+        }
+
+        // Filter out null values
+        const chartData = [];
+        for (let i = 0; i < timestamps.length; i++) {
+          if (prices[i] !== null && prices[i] !== undefined) {
+            chartData.push({
+              x: new Date(timestamps[i] * 1000),
+              y: prices[i]
+            });
+          }
+        }
+
+        console.log(`✓ Fetched ${chartData.length} data points for ${ticker} from API`);
+
+        return {
+          symbol: ticker,
+          data: chartData,
+          meta: result.meta
+        };
+
+      } catch (error) {
+        if (i < CORS_PROXIES.length - 1) {
+          console.log('Trying next proxy...');
+          continue;
+        }
+
+        throw new Error(`Failed to fetch data for ${ticker}: ${error.message}`);
+      }
+    }
+
+  } catch (error) {
+    throw new Error(`Failed to load chart data for ${ticker}: ${error.message}`);
   }
+}
+
+/**
+ * Filter data by time range
+ */
+function filterDataByRange(data, range) {
+  if (!data || data.length === 0) return [];
+
+  const now = new Date();
+  let startDate;
+
+  switch (range) {
+    case '1d':
+      startDate = new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000);
+      break;
+    case '5d':
+      startDate = new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000);
+      break;
+    case '1mo':
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    case '3mo':
+      startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      break;
+    case '6mo':
+      startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      break;
+    case 'ytd':
+      startDate = new Date(now.getFullYear(), 0, 1);
+      break;
+    case '1y':
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
+    case '2y':
+      startDate = new Date(now.getTime() - 2 * 365 * 24 * 60 * 60 * 1000);
+      break;
+    case '5y':
+      startDate = new Date(now.getTime() - 5 * 365 * 24 * 60 * 60 * 1000);
+      break;
+    case '10y':
+      startDate = new Date(now.getTime() - 10 * 365 * 24 * 60 * 60 * 1000);
+      break;
+    case 'max':
+      return data; // Return all data
+    default:
+      startDate = new Date(now.getFullYear(), 0, 1); // Default to YTD
+  }
+
+  return data.filter(point => new Date(point.x) >= startDate);
+}
+
+// ============================================================================
+// DATA TRANSFORMATION
+// ============================================================================
+
+/**
+ * Convert price data to percent change from first point
+ * @param {Array} data - Array of {x: Date, y: price} objects
+ * @param {Date} startDate - Optional start date for visible range
+ * @param {Date} endDate - Optional end date for visible range
+ * @returns {Array} Array of {x: Date, y: percentChange} objects
+ */
+function convertToPercentChange(data, startDate = null, endDate = null) {
+  if (!data || data.length === 0) return [];
+
+  // Filter data to visible range if dates provided
+  let visibleData = data;
+  if (startDate && endDate) {
+    visibleData = data.filter(point => {
+      const pointDate = new Date(point.x);
+      return pointDate >= startDate && pointDate <= endDate;
+    });
+  }
+
+  if (visibleData.length === 0) return data; // Fallback to original if no visible data
+
+  // Get the first price as baseline
+  const baselinePrice = visibleData[0].y;
+
+  // Convert all prices to percent change from baseline
+  return data.map(point => ({
+    x: point.x,
+    y: ((point.y - baselinePrice) / baselinePrice) * 100,
+    price: point.y // Store original price for tooltip
+  }));
+}
+
+/**
+ * Get visible date range from chart
+ */
+function getVisibleRange() {
+  if (!chartInstance) return null;
+
+  const xScale = chartInstance.scales.x;
+  if (!xScale) return null;
+
+  return {
+    min: new Date(xScale.min),
+    max: new Date(xScale.max)
+  };
+}
+
+/**
+ * Recalculate percent changes based on visible range
+ */
+function recalculatePercentChanges() {
+  if (displayMode !== 'percent') return;
+
+  const visibleRange = getVisibleRange();
+  if (!visibleRange) return;
+
+  let needsUpdate = false;
+
+  activeTickers.forEach((tickerData, ticker) => {
+    const newData = convertToPercentChange(
+      tickerData.rawData.data,
+      visibleRange.min,
+      visibleRange.max
+    );
+
+    // Update only if data changed
+    if (JSON.stringify(newData) !== JSON.stringify(tickerData.data.data)) {
+      tickerData.data = {
+        ...tickerData.rawData,
+        data: newData
+      };
+      needsUpdate = true;
+    }
+  });
+
+  if (needsUpdate) {
+    updateChartData();
+  }
+}
+
+/**
+ * Update chart data without recreating entire chart
+ */
+function updateChartData() {
+  if (!chartInstance) return;
+
+  const datasets = [];
+  activeTickers.forEach((tickerData, ticker) => {
+    const dataToUse = displayMode === 'percent' ? tickerData.data : tickerData.rawData;
+
+    datasets.push({
+      label: ticker,
+      data: dataToUse.data,
+      borderColor: tickerData.color,
+      backgroundColor: tickerData.color + '20',
+      borderWidth: tickerData.width,
+      fill: false,
+      tension: 0.1,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: tickerData.color,
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 2
+    });
+  });
+
+  chartInstance.data.datasets = datasets;
+  chartInstance.update('none'); // Update without animation
 }
 
 // ============================================================================
@@ -206,11 +542,12 @@ async function addTicker(ticker) {
       width = 2;
     }
 
-    // Store ticker data
+    // Store ticker data (both raw and processed)
     activeTickers.set(ticker, {
       color: color,
       width: width,
-      data: chartData
+      rawData: chartData, // Store original data
+      data: chartData // Will be transformed based on display mode
     });
 
     // Update UI
@@ -298,12 +635,21 @@ function updateChart() {
     chartInstance.destroy();
   }
 
-  // Prepare datasets
+  // Prepare datasets - use appropriate data based on display mode
   const datasets = [];
   activeTickers.forEach((tickerData, ticker) => {
+    // Transform data to percent if in percent mode
+    let dataToDisplay;
+    if (displayMode === 'percent') {
+      dataToDisplay = convertToPercentChange(tickerData.rawData.data);
+      tickerData.data = { ...tickerData.rawData, data: dataToDisplay };
+    } else {
+      dataToDisplay = tickerData.rawData.data;
+    }
+
     datasets.push({
       label: ticker,
-      data: tickerData.data.data,
+      data: dataToDisplay,
       borderColor: tickerData.color,
       backgroundColor: tickerData.color + '20',
       borderWidth: tickerData.width,
@@ -368,8 +714,19 @@ function updateChart() {
             },
             label: function(context) {
               const label = context.dataset.label || '';
-              const value = context.parsed.y;
-              return `${label}: $${value.toFixed(2)}`;
+              const dataPoint = context.raw;
+
+              if (displayMode === 'percent') {
+                const percentChange = context.parsed.y;
+                const price = dataPoint.price || 0;
+                return [
+                  `${label}: ${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(2)}%`,
+                  `Price: $${price.toFixed(2)}`
+                ];
+              } else {
+                const price = context.parsed.y;
+                return `${label}: $${price.toFixed(2)}`;
+              }
             }
           }
         },
@@ -377,7 +734,11 @@ function updateChart() {
           pan: {
             enabled: true,
             mode: 'x',
-            modifierKey: 'shift'
+            modifierKey: 'shift',
+            onPanComplete: function() {
+              // Recalculate percent changes after pan
+              setTimeout(() => recalculatePercentChanges(), 100);
+            }
           },
           zoom: {
             wheel: {
@@ -387,7 +748,11 @@ function updateChart() {
             pinch: {
               enabled: true
             },
-            mode: 'x'
+            mode: 'x',
+            onZoomComplete: function() {
+              // Recalculate percent changes after zoom
+              setTimeout(() => recalculatePercentChanges(), 100);
+            }
           },
           limits: {
             x: { min: 'original', max: 'original' }
@@ -446,7 +811,11 @@ function updateChart() {
               weight: '500'
             },
             callback: function(value) {
-              return '$' + value.toFixed(2);
+              if (displayMode === 'percent') {
+                return (value >= 0 ? '+' : '') + value.toFixed(1) + '%';
+              } else {
+                return '$' + value.toFixed(2);
+              }
             }
           }
         }
@@ -681,6 +1050,105 @@ function formatMarketCap(num) {
 }
 
 // ============================================================================
+// CLOCK AND MARKET STATUS (CHART PAGE)
+// ============================================================================
+
+/**
+ * Get current Eastern Time
+ */
+function getEasternTime() {
+  const now = new Date();
+  return new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
+}
+
+/**
+ * Format time as 12-hour clock
+ */
+function formatTime(date) {
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  return `${hours}:${minutes}:${seconds} ${ampm}`;
+}
+
+/**
+ * Check if market is open
+ */
+function isMarketOpen(etTime) {
+  const day = etTime.getDay();
+  if (day === 0 || day === 6) return false;
+
+  const hours = etTime.getHours();
+  const minutes = etTime.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+
+  const marketOpen = 9 * 60 + 30;  // 9:30 AM
+  const marketClose = 16 * 60;      // 4:00 PM
+
+  return timeInMinutes >= marketOpen && timeInMinutes < marketClose;
+}
+
+/**
+ * Check if market is closing soon (last 30 minutes)
+ */
+function isClosingSoon(etTime) {
+  const day = etTime.getDay();
+  if (day === 0 || day === 6) return false;
+
+  const hours = etTime.getHours();
+  const minutes = etTime.getMinutes();
+  const timeInMinutes = hours * 60 + minutes;
+
+  const closingSoonStart = 15 * 60 + 30;  // 3:30 PM
+  const marketClose = 16 * 60;             // 4:00 PM
+
+  return timeInMinutes >= closingSoonStart && timeInMinutes < marketClose;
+}
+
+/**
+ * Update clock and market status
+ */
+function updateClockAndStatus() {
+  const etTime = getEasternTime();
+  const clockElement = document.getElementById('chart-clock');
+  const indicatorElement = document.getElementById('chart-market-indicator');
+  const labelElement = document.getElementById('chart-market-label');
+
+  if (clockElement) {
+    clockElement.textContent = formatTime(etTime);
+  }
+
+  if (indicatorElement && labelElement) {
+    const marketOpen = isMarketOpen(etTime);
+    const closingSoon = isClosingSoon(etTime);
+
+    if (marketOpen && closingSoon) {
+      indicatorElement.className = 'market-dot closing-soon';
+      labelElement.textContent = 'Closing Soon';
+    } else if (marketOpen) {
+      indicatorElement.className = 'market-dot open';
+      labelElement.textContent = 'Market Open';
+    } else {
+      indicatorElement.className = 'market-dot closed';
+      labelElement.textContent = 'Market Closed';
+    }
+  }
+}
+
+/**
+ * Start clock updates
+ */
+function startClock() {
+  updateClockAndStatus();
+  setInterval(updateClockAndStatus, 1000);
+}
+
+// ============================================================================
 // EVENT HANDLERS
 // ============================================================================
 
@@ -718,9 +1186,22 @@ function initEventListeners() {
   });
 
   // Chart controls
+  document.getElementById('toggle-display-mode-btn').addEventListener('click', function() {
+    // Toggle between percent and price modes
+    displayMode = displayMode === 'percent' ? 'price' : 'percent';
+
+    // Update button text
+    this.textContent = displayMode === 'percent' ? '📊 Switch to Price View' : '📈 Switch to Percent View';
+
+    // Update chart
+    updateChart();
+  });
+
   document.getElementById('reset-zoom-btn').addEventListener('click', () => {
     if (chartInstance) {
       chartInstance.resetZoom();
+      // Recalculate percent changes after reset
+      setTimeout(() => recalculatePercentChanges(), 100);
     }
   });
 
@@ -768,6 +1249,9 @@ function initEventListeners() {
  */
 async function init() {
   console.log('Initializing FranchiseIQ Interactive Stock Chart...');
+
+  // Start clock and market status
+  startClock();
 
   // Setup event listeners
   initEventListeners();

@@ -26,6 +26,16 @@
             </a>
             <h1>Interactive Stock Charts</h1>
         </div>
+        <div class="header-right">
+            <div class="clock-display">
+                <span id="chart-clock">--:--:-- --</span>
+                <span id="chart-timezone">ET</span>
+            </div>
+            <div class="market-status-display">
+                <span id="chart-market-indicator" class="market-dot closed"></span>
+                <span id="chart-market-label">Market Closed</span>
+            </div>
+        </div>
     </header>
 
     <!-- Control Panel -->
@@ -61,6 +71,9 @@
 
         <!-- Chart Controls -->
         <div class="control-group inline-controls">
+            <button id="toggle-display-mode-btn" class="btn btn-primary" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                📊 Switch to Price View
+            </button>
             <button id="reset-zoom-btn" class="btn btn-secondary">Reset Zoom</button>
             <button id="toggle-legend-btn" class="btn btn-secondary">Toggle Legend</button>
             <button id="toggle-year-markers-btn" class="btn btn-secondary">Toggle Year Markers</button>

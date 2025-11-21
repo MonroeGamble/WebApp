@@ -627,3 +627,102 @@ body {
   font-weight: 600;
 }
 
+
+/* ============================================================================
+   HEADER ENHANCEMENTS - Clock and Market Status
+   ============================================================================ */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.clock-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 15px;
+  border-radius: 6px;
+}
+
+#chart-clock {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+#chart-timezone {
+  font-size: 12px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+.market-status-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 15px;
+  border-radius: 6px;
+}
+
+.market-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 8px currentColor;
+  transition: all 0.3s ease;
+}
+
+.market-dot.open {
+  background-color: #43e97b;
+  color: #43e97b;
+}
+
+.market-dot.closing-soon {
+  background-color: #ff9800;
+  color: #ff9800;
+  animation: pulse-orange 2s ease-in-out infinite;
+}
+
+.market-dot.closed {
+  background-color: #fa709a;
+  color: #fa709a;
+}
+
+@keyframes pulse-orange {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px currentColor;
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 15px currentColor;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .clock-display,
+  .market-status-display {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
+
