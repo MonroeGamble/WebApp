@@ -25,8 +25,39 @@
 
     <!-- Chart.js Date Adapter -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+    <!-- Ticker Widget Styles -->
+    <link rel="stylesheet" href="../Website/style.css">
 </head>
 <body>
+    <!-- Live Ticker -->
+    <div class="ticker-wrapper-chart">
+        <div id="closing-message-chart" style="display: none; background: #ff9800; color: white; text-align: center; padding: 8px; font-weight: 600; font-size: 14px;">
+            📊 Showing Closing Prices
+        </div>
+        <div id="status-bar-chart">
+            <div id="clock-section-chart">
+                <span id="clock-chart-ticker">--:--:-- --</span>
+                <span id="timezone-chart">ET</span>
+            </div>
+            <div id="market-status-section-chart">
+                <span id="market-indicator-chart" class="closed"></span>
+                <span id="market-label-chart">Market Closed</span>
+            </div>
+            <div id="last-updated-section-chart" style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 12px; color: #999;">Updated:</span>
+                <span id="last-updated-chart" style="font-weight: 600; font-size: 13px; color: #667eea;">--:--</span>
+            </div>
+            <div id="refresh-section-chart">
+                <span id="refresh-label-chart">Next:</span>
+                <span id="countdown-chart">60:00</span>
+            </div>
+        </div>
+        <div id="ticker-container-chart">
+            <div id="ticker-content-chart"></div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -186,5 +217,181 @@
     </footer>
 
     <script src="chart.js"></script>
+
+    <!-- Ticker Widget Script (Chart Page Instance) -->
+    <script>
+        // Duplicate ticker code for chart page with unique IDs
+        const TICKER_SYMBOLS_CHART = [
+          "^GSPC", "^IXIC", "^DJI",
+          "MCD", "YUM", "QSR", "WEN", "DPZ", "JACK", "WING", "SHAK", "CAVA",
+          "DENN", "DIN", "DNUT", "NATH", "RRGB",
+          "DRVN", "HRB", "CAR", "UHAL",
+          "PLNT", "BFT",
+          "MAR", "HLT", "H", "CHH", "WH", "VAC", "TNL", "CWH",
+          "GNC", "RENT",
+          "SERV", "ROL",
+          "ADUS",
+          "LOPE",
+          "PLAY", "ARCO",
+          "TAST"
+        ];
+        const REFRESH_INTERVAL_CHART = 3600000;
+        let lastKnownDataChart = {};
+        let lastMarketDataChart = {};
+
+        // Load from localStorage
+        try {
+          const cached = localStorage.getItem('franresearch_ticker_cache');
+          if (cached) {
+            lastKnownDataChart = JSON.parse(cached);
+            console.log('[Chart Ticker] Loaded cached data');
+          }
+        } catch (e) {
+          console.error('[Chart Ticker] Failed to load cache:', e);
+        }
+
+        async function fetchStockDataChart() {
+          const symbolsParam = TICKER_SYMBOLS_CHART.join(',');
+          const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbolsParam}`;
+
+          const corsProxies = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            ''
+          ];
+
+          for (let i = 0; i < corsProxies.length; i++) {
+            const proxy = corsProxies[i];
+            const url = proxy ? proxy + encodeURIComponent(yahooUrl) : yahooUrl;
+
+            try {
+              const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } });
+
+              if (!response.ok) throw new Error(`API returned status ${response.status}`);
+
+              const data = await response.json();
+              if (!data.quoteResponse || !data.quoteResponse.result) throw new Error('Invalid API response');
+
+              const quotes = data.quoteResponse.result;
+              const stockData = {};
+
+              quotes.forEach(quote => {
+                const symbol = quote.symbol;
+                const price = quote.regularMarketPrice || quote.regularMarketPreviousClose;
+                const change = quote.regularMarketChangePercent;
+
+                if (price !== undefined && price !== null && !isNaN(price)) {
+                  stockData[symbol] = {
+                    symbol: symbol,
+                    price: price.toFixed(2),
+                    changePercent: change !== undefined && change !== null && !isNaN(change) ? change.toFixed(2) : '–',
+                    isPositive: change > 0,
+                    isNegative: change < 0
+                  };
+                }
+              });
+
+              if (Object.keys(stockData).length > 0) {
+                lastKnownDataChart = { ...lastKnownDataChart, ...stockData };
+                try {
+                  localStorage.setItem('franresearch_ticker_cache', JSON.stringify(lastKnownDataChart));
+                } catch (e) {}
+                lastMarketDataChart = lastKnownDataChart;
+              }
+
+              return lastKnownDataChart;
+            } catch (error) {
+              if (i < corsProxies.length - 1) continue;
+            }
+          }
+
+          return Object.keys(lastKnownDataChart).length > 0 ? lastKnownDataChart : {};
+        }
+
+        function renderTickerChart(stockData) {
+          const tickerContent = document.getElementById('ticker-content-chart');
+          tickerContent.innerHTML = '';
+
+          TICKER_SYMBOLS_CHART.forEach(symbol => {
+            const stockInfo = stockData[symbol];
+            if (stockInfo) {
+              const item = document.createElement('div');
+              item.className = 'ticker-item';
+
+              const symbolEl = document.createElement('span');
+              symbolEl.className = 'ticker-symbol';
+              symbolEl.textContent = stockInfo.symbol;
+
+              const priceEl = document.createElement('span');
+              priceEl.className = 'ticker-price';
+              priceEl.textContent = stockInfo.price;
+
+              const changeEl = document.createElement('span');
+              changeEl.className = 'ticker-change';
+              if (stockInfo.isPositive) {
+                changeEl.classList.add('positive');
+                changeEl.textContent = `+${stockInfo.changePercent}%`;
+              } else if (stockInfo.isNegative) {
+                changeEl.classList.add('negative');
+                changeEl.textContent = `${stockInfo.changePercent}%`;
+              } else {
+                changeEl.classList.add('neutral');
+                changeEl.textContent = stockInfo.changePercent === '–' ? '–' : `${stockInfo.changePercent}%`;
+              }
+
+              item.appendChild(symbolEl);
+              item.appendChild(priceEl);
+              item.appendChild(changeEl);
+              tickerContent.appendChild(item);
+            }
+          });
+
+          // Duplicate for seamless scroll
+          TICKER_SYMBOLS_CHART.forEach(symbol => {
+            const stockInfo = stockData[symbol];
+            if (stockInfo) {
+              const item = document.createElement('div');
+              item.className = 'ticker-item';
+              const symbolEl = document.createElement('span');
+              symbolEl.className = 'ticker-symbol';
+              symbolEl.textContent = stockInfo.symbol;
+              const priceEl = document.createElement('span');
+              priceEl.className = 'ticker-price';
+              priceEl.textContent = stockInfo.price;
+              const changeEl = document.createElement('span');
+              changeEl.className = 'ticker-change';
+              if (stockInfo.isPositive) {
+                changeEl.classList.add('positive');
+                changeEl.textContent = `+${stockInfo.changePercent}%`;
+              } else if (stockInfo.isNegative) {
+                changeEl.classList.add('negative');
+                changeEl.textContent = `${stockInfo.changePercent}%`;
+              } else {
+                changeEl.classList.add('neutral');
+                changeEl.textContent = stockInfo.changePercent === '–' ? '–' : `${stockInfo.changePercent}%`;
+              }
+              item.appendChild(symbolEl);
+              item.appendChild(priceEl);
+              item.appendChild(changeEl);
+              tickerContent.appendChild(item);
+            }
+          });
+        }
+
+        async function updateTickerChart() {
+          try {
+            const stockData = await fetchStockDataChart();
+            renderTickerChart(stockData);
+          } catch (error) {
+            if (Object.keys(lastKnownDataChart).length > 0) {
+              renderTickerChart(lastKnownDataChart);
+            }
+          }
+        }
+
+        // Initialize chart ticker
+        updateTickerChart();
+        setInterval(updateTickerChart, REFRESH_INTERVAL_CHART);
+    </script>
 </body>
 </html>

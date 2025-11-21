@@ -22,6 +22,38 @@ let showYearMarkers = true; // Toggle for year-end markers
 let displayMode = 'percent'; // 'percent' or 'price'
 let currentModal = null;
 
+// Chart Data Cache (1 hour expiration)
+const CHART_CACHE_DURATION = 3600000; // 1 hour
+function getCachedChartData(ticker, range) {
+  try {
+    const cacheKey = `chart_${ticker}_${range}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CHART_CACHE_DURATION) {
+        console.log(`✓ Using cached data for ${ticker} (${range})`);
+        return data;
+      }
+    }
+  } catch (e) {
+    console.error('Cache read error:', e);
+  }
+  return null;
+}
+
+function setCachedChartData(ticker, range, data) {
+  try {
+    const cacheKey = `chart_${ticker}_${range}`;
+    localStorage.setItem(cacheKey, JSON.stringify({
+      data: data,
+      timestamp: Date.now()
+    }));
+    console.log(`✓ Cached data for ${ticker} (${range})`);
+  } catch (e) {
+    console.error('Cache write error:', e);
+  }
+}
+
 // Color Palette for auto-assignment (^GSPC gets black, others get colors)
 const COLOR_PALETTE = [
   '#667eea', '#764ba2', '#f093fb', '#4facfe',
@@ -211,6 +243,12 @@ async function fetchQuoteData(ticker) {
  * Loads from CSV when available, falls back to API
  */
 async function fetchChartData(ticker, range) {
+  // Check cache first
+  const cachedData = getCachedChartData(ticker, range);
+  if (cachedData) {
+    return cachedData;
+  }
+
   try {
     // Try to load historical data from CSV first
     let historicalData = await loadHistoricalDataFromCSV(ticker);
@@ -239,22 +277,32 @@ async function fetchChartData(ticker, range) {
         // Filter to requested range
         const filteredData = filterDataByRange(mergedData, range);
 
-        return {
+        const result = {
           symbol: ticker,
           data: filteredData,
           meta: { fromCSV: true }
         };
+
+        // Cache the result
+        setCachedChartData(ticker, range, result);
+
+        return result;
 
       } catch (error) {
         console.warn(`Could not fetch today's data, using CSV only: ${error.message}`);
 
         const filteredData = filterDataByRange(historicalData, range);
 
-        return {
+        const result = {
           symbol: ticker,
           data: filteredData,
           meta: { fromCSV: true }
         };
+
+        // Cache the result
+        setCachedChartData(ticker, range, result);
+
+        return result;
       }
     }
 
@@ -307,11 +355,16 @@ async function fetchChartData(ticker, range) {
 
         console.log(`✓ Fetched ${chartData.length} data points for ${ticker} from API`);
 
-        return {
+        const apiResult = {
           symbol: ticker,
           data: chartData,
           meta: result.meta
         };
+
+        // Cache the result
+        setCachedChartData(ticker, range, apiResult);
+
+        return apiResult;
 
       } catch (error) {
         if (i < CORS_PROXIES.length - 1) {
@@ -1259,6 +1312,35 @@ function initEventListeners() {
 // ============================================================================
 
 /**
+ * Pre-load default ticker data in background for faster display
+ */
+async function preloadDefaultTickers() {
+  console.log('Pre-loading default ticker data...');
+
+  const ranges = ['ytd', '1y', '5y']; // Pre-load common ranges
+
+  for (const ticker of DEFAULT_TICKERS) {
+    for (const range of ranges) {
+      try {
+        // Check if already cached
+        const cached = getCachedChartData(ticker, range);
+        if (!cached) {
+          // Fetch and cache in background
+          await fetchChartData(ticker, range);
+          console.log(`✓ Pre-loaded ${ticker} (${range})`);
+        } else {
+          console.log(`✓ ${ticker} (${range}) already cached`);
+        }
+      } catch (error) {
+        console.error(`Failed to pre-load ${ticker} (${range}):`, error.message);
+      }
+    }
+  }
+
+  console.log('✓ Pre-loading complete');
+}
+
+/**
  * Initialize the application
  */
 async function init() {
@@ -1282,6 +1364,11 @@ async function init() {
   }
 
   hideLoading();
+
+  // Pre-load additional ranges in background for faster switching
+  setTimeout(() => {
+    preloadDefaultTickers();
+  }, 2000); // Wait 2 seconds after initial load to pre-load other ranges
 
   console.log('✓ Chart initialized');
 }
