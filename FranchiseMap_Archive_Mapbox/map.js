@@ -1,7 +1,11 @@
 // ============================================================================
-// FRANCHISE LOCATION MAP - GOOGLE MAPS
-// Using Google Maps JavaScript API
+// FRANCHISE LOCATION MAP
+// Using Mapbox GL JS and OpenStreetMap
 // ============================================================================
+
+// Mapbox access token (users should replace with their own)
+// Get free token at https://account.mapbox.com/
+mapboxgl.accessToken = 'pk.eyJ1IjoiZnJhbnJlc2VhcmNoIiwiYSI6ImNscXh5emRvYzBjZG0ybHF4YXR2ZXkwdTkifQ.example'; // Replace with your token
 
 // Sample franchise location data (representative locations)
 const franchiseLocations = [
@@ -46,51 +50,32 @@ const franchiseLocations = [
     { brand: 'HRB', name: 'H&R Block - Denver', type: 'Service', lat: 39.7392, lng: -104.9903, address: '16th St, Denver, CO', color: '#ffa07a' },
 ];
 
-// Global variables
+// Initialize map
 let map;
 let markers = [];
 let currentFilter = 'all';
-let infoWindow;
 
-// Initialize map
 function initMap() {
     // Create map centered on US
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 39.8283, lng: -98.5795 }, // Center of continental US
+    map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v12', // Use streets style
+        center: [-98.5795, 39.8283], // Center of continental US
         zoom: 4,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: google.maps.ControlPosition.TOP_RIGHT
-        },
-        streetViewControl: true,
-        streetViewControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_TOP
-        },
-        fullscreenControl: true,
-        fullscreenControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_TOP
-        },
-        zoomControl: true,
-        zoomControlOptions: {
-            position: google.maps.ControlPosition.RIGHT_CENTER
-        },
-        gestureHandling: 'greedy', // Allow single-finger pan on mobile
-        styles: [
-            // Subtle custom styling
-            {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [{ visibility: 'off' }] // Hide POI labels for cleaner look
-            }
-        ]
+        touchPitch: false, // Disable pitch on mobile
+        dragRotate: false // Disable rotation
     });
 
-    // Create info window
-    infoWindow = new google.maps.InfoWindow();
+    // Add navigation controls
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    // Add markers
-    addMarkers();
+    // Add scale control
+    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+
+    // Wait for map to load
+    map.on('load', () => {
+        addMarkers();
+    });
 
     // Handle filter changes
     document.getElementById('brand-filter').addEventListener('change', (e) => {
@@ -101,63 +86,45 @@ function initMap() {
     // Handle close panel button
     document.getElementById('close-panel').addEventListener('click', () => {
         document.getElementById('info-panel').classList.remove('active');
-        infoWindow.close();
     });
 }
 
 // Add markers to map
 function addMarkers() {
     franchiseLocations.forEach(location => {
-        // Create custom marker icon
-        const icon = {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: location.color,
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3,
-            scale: 10
-        };
+        // Create marker element
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.backgroundColor = location.color;
+        el.style.width = '20px';
+        el.style.height = '20px';
+        el.style.borderRadius = '50%';
+        el.style.border = '3px solid white';
+        el.style.cursor = 'pointer';
+        el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.3)';
+        el.style.transition = 'transform 0.2s';
+
+        el.addEventListener('mouseenter', () => {
+            el.style.transform = 'scale(1.3)';
+        });
+
+        el.addEventListener('mouseleave', () => {
+            el.style.transform = 'scale(1)';
+        });
 
         // Create marker
-        const marker = new google.maps.Marker({
-            position: { lat: location.lat, lng: location.lng },
-            map: map,
-            title: location.name,
-            icon: icon,
-            animation: google.maps.Animation.DROP
-        });
+        const marker = new mapboxgl.Marker(el)
+            .setLngLat([location.lng, location.lat])
+            .addTo(map);
 
         // Add click event
-        marker.addListener('click', () => {
+        el.addEventListener('click', () => {
             showLocationDetails(location);
-
-            // Pan to marker and zoom in slightly
-            map.panTo(marker.getPosition());
-            if (map.getZoom() < 14) {
-                map.setZoom(14);
-            }
-
-            // Show info window
-            infoWindow.setContent(`
-                <div style="padding: 10px;">
-                    <h3 style="margin: 0 0 8px 0; color: #333; font-size: 1.1em;">${location.name}</h3>
-                    <p style="margin: 4px 0; color: #666; font-size: 0.95em;"><strong>Brand:</strong> ${location.brand}</p>
-                    <p style="margin: 4px 0; color: #666; font-size: 0.95em;">${location.address}</p>
-                </div>
-            `);
-            infoWindow.open(map, marker);
-        });
-
-        // Hover effect
-        marker.addListener('mouseover', () => {
-            marker.setIcon({
-                ...icon,
-                scale: 13
+            map.flyTo({
+                center: [location.lng, location.lat],
+                zoom: 14,
+                duration: 1500
             });
-        });
-
-        marker.addListener('mouseout', () => {
-            marker.setIcon(icon);
         });
 
         // Store marker reference
@@ -169,15 +136,11 @@ function addMarkers() {
 function filterMarkers() {
     markers.forEach(({ marker, location }) => {
         if (currentFilter === 'all' || location.brand === currentFilter) {
-            marker.setVisible(true);
+            marker.getElement().style.display = 'block';
         } else {
-            marker.setVisible(false);
+            marker.getElement().style.display = 'none';
         }
     });
-
-    // Close info window and panel when filtering
-    infoWindow.close();
-    document.getElementById('info-panel').classList.remove('active');
 }
 
 // Show location details in panel
@@ -209,23 +172,9 @@ function showLocationDetails(location) {
     panel.classList.add('active');
 }
 
-// Handle window errors gracefully
-window.gm_authFailure = function() {
-    document.getElementById('map').innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; padding: 40px; text-align: center;">
-            <div>
-                <h2 style="color: #333; margin-bottom: 15px;">⚠️ Google Maps API Key Required</h2>
-                <p style="color: #666; margin-bottom: 10px;">To use this map, you need a Google Maps API key.</p>
-                <p style="color: #666; margin-bottom: 20px;">
-                    <strong>Get a free API key at:</strong><br>
-                    <a href="https://developers.google.com/maps/gmp-get-started" target="_blank" style="color: #667eea;">
-                        https://developers.google.com/maps/gmp-get-started
-                    </a>
-                </p>
-                <p style="color: #666; font-size: 0.9em;">
-                    Replace YOUR_API_KEY in map.html with your actual key.
-                </p>
-            </div>
-        </div>
-    `;
-};
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+} else {
+    initMap();
+}
