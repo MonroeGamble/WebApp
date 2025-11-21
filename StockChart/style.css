@@ -126,7 +126,7 @@ body {
 
 .header h1 {
   color: white;
-  font-size: 3em;
+  font-size: 2.4em;
   font-weight: 700;
 }
 
@@ -155,7 +155,7 @@ body {
   font-weight: 600;
   color: #333;
   margin-bottom: 10px;
-  font-size: 1.6em;
+  font-size: 1.3em;
 }
 
 /* Ticker Input */
@@ -168,10 +168,10 @@ body {
 .ticker-input-group input {
   flex: 1;
   max-width: 400px;
-  padding: 15px 20px;
+  padding: 12px 16px;
   border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 1.4em;
+  font-size: 1.1em;
   font-family: inherit;
   text-transform: uppercase;
   transition: border-color 0.2s;
@@ -195,10 +195,10 @@ body {
   align-items: center;
   gap: 10px;
   background: #f5f5f5;
-  padding: 12px 18px;
+  padding: 10px 15px;
   border-radius: 25px;
   border: 2px solid;
-  font-size: 1.4em;
+  font-size: 1.1em;
   font-weight: 600;
 }
 
@@ -232,9 +232,9 @@ body {
 .error-message {
   display: none;
   color: #ff4444;
-  font-size: 1.3em;
+  font-size: 1.05em;
   margin-top: 10px;
-  padding: 12px 18px;
+  padding: 10px 15px;
   background: rgba(255, 68, 68, 0.1);
   border-radius: 8px;
   border-left: 4px solid #ff4444;
@@ -259,10 +259,10 @@ body {
    ============================================================================ */
 
 .btn {
-  padding: 14px 28px;
+  padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  font-size: 1.3em;
+  font-size: 1.05em;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
@@ -296,8 +296,8 @@ body {
   background: white;
   color: #667eea;
   border: 2px solid #667eea;
-  padding: 12px 22px;
-  font-size: 1.2em;
+  padding: 10px 18px;
+  font-size: 0.95em;
 }
 
 .btn-range:hover {
@@ -510,7 +510,7 @@ body {
 }
 
 .sitemap-section h3 {
-  font-size: 1.8em;
+  font-size: 1.4em;
   margin-bottom: 18px;
   color: #ffffff;
 }
@@ -521,14 +521,14 @@ body {
 
 .sitemap-section ul li {
   margin-bottom: 12px;
-  font-size: 1.3em;
+  font-size: 1.05em;
 }
 
 .sitemap-section a {
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   transition: color 0.2s;
-  font-size: 1.3em;
+  font-size: 1.05em;
 }
 
 .sitemap-section a:hover {
@@ -539,7 +539,7 @@ body {
 .sitemap-section p {
   color: rgba(255, 255, 255, 0.85);
   line-height: 1.7;
-  font-size: 1.3em;
+  font-size: 1.05em;
 }
 
 .copyright {
@@ -547,7 +547,7 @@ body {
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 1.2em;
+  font-size: 0.95em;
 }
 
 /* ============================================================================
@@ -727,10 +727,10 @@ body {
   align-items: center;
   gap: 10px;
   color: white;
-  font-size: 1.4em;
+  font-size: 1.1em;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.1);
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 8px;
 }
 
@@ -750,10 +750,10 @@ body {
   align-items: center;
   gap: 12px;
   color: white;
-  font-size: 1.4em;
+  font-size: 1.1em;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.1);
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 8px;
 }
 
@@ -762,10 +762,10 @@ body {
   align-items: center;
   gap: 8px;
   color: white;
-  font-size: 1.4em;
+  font-size: 1.1em;
   font-weight: 600;
   background: rgba(255, 255, 255, 0.1);
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: 8px;
 }
 
