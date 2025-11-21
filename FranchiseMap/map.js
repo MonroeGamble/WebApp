@@ -1,4 +1,5 @@
 // ============================================================================
+// FRANCHISE LOCATION MAP - Google Maps Version
 // FRANCHISE LOCATION MAP - GOOGLE MAPS
 // Using Google Maps JavaScript API
 // ============================================================================
@@ -52,6 +53,7 @@ let markers = [];
 let currentFilter = 'all';
 let infoWindow;
 
+// Initialize map (called by Google Maps API callback)
 // Initialize map
 function initMap() {
     // Create map centered on US
@@ -60,17 +62,29 @@ function initMap() {
         zoom: 4,
         mapTypeControl: true,
         mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
             position: google.maps.ControlPosition.TOP_RIGHT
         },
         streetViewControl: true,
         streetViewControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
+        },
+        zoomControl: true,
+        zoomControlOptions: {
+            position: google.maps.ControlPosition.RIGHT_BOTTOM
             position: google.maps.ControlPosition.RIGHT_TOP
         },
         fullscreenControl: true,
         fullscreenControlOptions: {
             position: google.maps.ControlPosition.RIGHT_TOP
         },
+        gestureHandling: 'greedy', // Allow one-finger pan on mobile
+        styles: [
+            {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'on' }]
         zoomControl: true,
         zoomControlOptions: {
             position: google.maps.ControlPosition.RIGHT_CENTER
@@ -108,6 +122,36 @@ function initMap() {
 // Add markers to map
 function addMarkers() {
     franchiseLocations.forEach(location => {
+        // Create custom marker icon (colored circle)
+        const icon = {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: location.color,
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 3
+        };
+
+        // Create marker
+        const marker = new google.maps.Marker({
+            position: { lat: location.lat, lng: location.lng },
+            map: map,
+            icon: icon,
+            title: location.name,
+            animation: google.maps.Animation.DROP,
+            optimized: false // Allow CSS animations
+        });
+
+        // Add hover effect
+        marker.addListener('mouseover', () => {
+            marker.setIcon({
+                ...icon,
+                scale: 13
+            });
+        });
+
+        marker.addListener('mouseout', () => {
+            marker.setIcon(icon);
         // Create custom marker icon
         const icon = {
             path: google.maps.SymbolPath.CIRCLE,
@@ -130,6 +174,8 @@ function addMarkers() {
         // Add click event
         marker.addListener('click', () => {
             showLocationDetails(location);
+            map.panTo(marker.getPosition());
+            map.setZoom(14);
 
             // Pan to marker and zoom in slightly
             map.panTo(marker.getPosition());
@@ -209,6 +255,8 @@ function showLocationDetails(location) {
     panel.classList.add('active');
 }
 
+// Make initMap globally accessible for Google Maps callback
+window.initMap = initMap;
 // Handle window errors gracefully
 window.gm_authFailure = function() {
     document.getElementById('map').innerHTML = `

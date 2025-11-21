@@ -323,19 +323,30 @@ class NewsService {
   }
 
   /**
-   * Get all news articles (mock data for now)
+   * Get all news articles
    *
-   * FUTURE: Replace this with:
-   *   return fetch('/api/franchise-news').then(r => r.json());
-   * or:
-   *   return fetch('/data/news.json').then(r => r.json());
+   * Now fetches from static JSON file updated by GitHub Actions.
+   * The JSON file is automatically updated every 6 hours by the workflow.
    *
    * @returns {Promise<Array>} Promise resolving to NewsArticle array
    */
   async getAllArticles() {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return [...this.articles];
+    try {
+      // Fetch from static JSON file (updated by GitHub Actions)
+      const response = await fetch('/FranchiseNews/data/news.json');
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const articles = await response.json();
+      return articles;
+    } catch (error) {
+      console.warn('[NewsService] Failed to fetch news.json, falling back to mock data:', error);
+
+      // Fallback to mock data if fetch fails (for local development)
+      return MOCK_NEWS_ARTICLES;
+    }
   }
 
   /**

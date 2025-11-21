@@ -16,79 +16,6 @@ body {
   flex-direction: column;
 }
 
-/* Ticker wrapper for chart page */
-.ticker-wrapper-chart {
-  width: 100%;
-  background: #0a0a0a;
-  margin-bottom: 0;
-}
-
-#status-bar-chart {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #0f0f0f;
-  padding: 8px 20px;
-  border-bottom: 1px solid #333;
-  color: #e0e0e0;
-  font-size: 13px;
-  height: 40px;
-}
-
-#ticker-container-chart {
-  width: 100%;
-  background: linear-gradient(90deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #333;
-  height: 60px;
-}
-
-#ticker-content-chart {
-  display: flex;
-  white-space: nowrap;
-  animation: scroll-left 90s linear infinite;
-  will-change: transform;
-}
-
-#ticker-content-chart:hover {
-  animation-play-state: paused;
-}
-
-#clock-section-chart,
-#market-status-section-chart,
-#refresh-section-chart,
-#last-updated-section-chart {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#clock-chart-ticker {
-  font-weight: 600;
-  font-size: 14px;
-  color: #ffffff;
-}
-
-#market-indicator-chart {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  box-shadow: 0 0 6px currentColor;
-}
-
-#market-indicator-chart.open {
-  background-color: #00ff88;
-  color: #00ff88;
-}
-
-#market-indicator-chart.closed {
-  background-color: #ff4444;
-  color: #ff4444;
-}
-
 /* ============================================================================
    HEADER
    ============================================================================ */
@@ -128,6 +55,98 @@ body {
   color: white;
   font-size: 1.6em;
   font-weight: 700;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.clock-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#chart-clock {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+  font-variant-numeric: tabular-nums;
+}
+
+#chart-timezone {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+.market-status-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.market-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.market-dot.open {
+  background-color: #00ff88;
+  color: #00ff88;
+}
+
+.market-dot.closed {
+  background-color: #ff4444;
+  color: #ff4444;
+}
+
+.market-dot.opening-soon,
+.market-dot.closing-soon {
+  background-color: #ff9800;
+  color: #ff9800;
+  animation: pulse-orange 2s ease-in-out infinite;
+}
+
+@keyframes pulse-orange {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 10px currentColor;
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 20px currentColor;
+  }
+}
+
+#chart-market-label {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.market-time-display {
+  display: flex;
+  align-items: center;
+}
+
+#chart-market-time {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+.last-updated-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ============================================================================
