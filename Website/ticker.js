@@ -47,7 +47,7 @@ try {
 async function fetchLiveTickerData() {
   try {
     console.log('Fetching live ticker data from Finnhub...');
-    const response = await fetch('/data/live_ticker.json');
+    const response = await fetch('data/live_ticker.json');
 
     if (!response.ok) {
       throw new Error(`Failed to fetch live ticker: ${response.status}`);
@@ -96,7 +96,7 @@ async function fetchLiveTickerData() {
 async function fetchStockDataFromCSV() {
   try {
     console.log('Fetching stock data from CSV...');
-    const response = await fetch('/data/franchise_stocks.csv');
+    const response = await fetch('data/franchise_stocks.csv');
 
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV: ${response.status}`);
