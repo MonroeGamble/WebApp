@@ -47,7 +47,7 @@ try {
 async function fetchLiveTickerData() {
   try {
     console.log('Fetching live ticker data from Finnhub...');
-    const response = await fetch('/data/live_ticker.json');
+    const response = await fetch('data/live_ticker.json');
 
     if (!response.ok) {
       throw new Error(`Failed to fetch live ticker: ${response.status}`);
@@ -96,7 +96,7 @@ async function fetchLiveTickerData() {
 async function fetchStockDataFromCSV() {
   try {
     console.log('Fetching stock data from CSV...');
-    const response = await fetch('/data/franchise_stocks.csv');
+    const response = await fetch('data/franchise_stocks.csv');
 
     if (!response.ok) {
       throw new Error(`Failed to fetch CSV: ${response.status}`);
@@ -618,6 +618,30 @@ function updateClock() {
 }
 
 /**
+ * Get time until market close in seconds
+ */
+function getTimeUntilClose(etTime) {
+  const hours = etTime.getHours();
+  const minutes = etTime.getMinutes();
+  const seconds = etTime.getSeconds();
+
+  // Market closes at 4:00 PM (16:00)
+  const marketClose = 16 * 60; // 4:00 PM in minutes
+  const currentTimeInMinutes = hours * 60 + minutes;
+
+  // Calculate minutes until close
+  const minutesUntilClose = marketClose - currentTimeInMinutes;
+
+  if (minutesUntilClose <= 0) {
+    return 0;
+  }
+
+  // Convert to seconds
+  const secondsUntilClose = (minutesUntilClose * 60) - seconds;
+  return secondsUntilClose > 0 ? secondsUntilClose : 0;
+}
+
+/**
  * Get time until next market open in seconds
  */
 function getTimeUntilOpen(etTime) {
@@ -683,11 +707,79 @@ function formatCountdown(totalSeconds) {
 }
 
 /**
+ * Update giant countdown clock
+ */
+function updateGiantCountdown() {
+  const giantCountdown = document.getElementById('giant-countdown');
+  const hoursEl = document.getElementById('countdown-hours');
+  const minutesEl = document.getElementById('countdown-minutes');
+  const secondsEl = document.getElementById('countdown-seconds');
+
+  if (!giantCountdown || !hoursEl || !minutesEl || !secondsEl) return;
+
+  const etTime = getEasternTime();
+  const marketOpen = isMarketOpen(etTime);
+
+  if (!marketOpen) {
+    // Hide when market is closed
+    giantCountdown.style.display = 'none';
+    return;
+  }
+
+  const secondsUntilClose = getTimeUntilClose(etTime);
+  const twoHoursInSeconds = 2 * 60 * 60; // 2 hours
+
+  // Only show if within 2 hours of close
+  if (secondsUntilClose <= twoHoursInSeconds && secondsUntilClose > 0) {
+    giantCountdown.style.display = 'block';
+
+    // Calculate time components
+    const hours = Math.floor(secondsUntilClose / 3600);
+    const minutes = Math.floor((secondsUntilClose % 3600) / 60);
+    const seconds = secondsUntilClose % 60;
+
+    // Update display
+    hoursEl.textContent = String(hours).padStart(2, '0');
+    minutesEl.textContent = String(minutes).padStart(2, '0');
+    secondsEl.textContent = String(seconds).padStart(2, '0');
+
+    // Change colors based on time remaining
+    giantCountdown.classList.remove('warning-orange', 'warning-red', 'complete-green');
+
+    if (secondsUntilClose <= 60 * 60) {
+      // Less than 1 hour: RED (critical)
+      giantCountdown.classList.add('warning-red');
+    } else {
+      // 1-2 hours: ORANGE (warning)
+      giantCountdown.classList.add('warning-orange');
+    }
+  } else if (secondsUntilClose <= 0) {
+    // Market just closed - show green briefly
+    giantCountdown.style.display = 'block';
+    giantCountdown.classList.remove('warning-orange', 'warning-red');
+    giantCountdown.classList.add('complete-green');
+    hoursEl.textContent = '00';
+    minutesEl.textContent = '00';
+    secondsEl.textContent = '00';
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+      giantCountdown.style.display = 'none';
+    }, 5000);
+  } else {
+    // More than 2 hours until close - hide
+    giantCountdown.style.display = 'none';
+  }
+}
+
+/**
  * Update countdown timer
  */
 function updateCountdown() {
   const countdownElement = document.getElementById('countdown');
   const refreshLabelElement = document.getElementById('refresh-label');
+  const marketCloseSection = document.getElementById('market-close-section');
+  const marketCloseCountdown = document.getElementById('market-close-countdown');
   const etTime = getEasternTime();
   const marketOpen = isMarketOpen(etTime);
 
@@ -704,13 +796,36 @@ function updateCountdown() {
     if (countdownSeconds < 0) {
       countdownSeconds = 0;
     }
+
+    // Show market close countdown
+    if (marketCloseSection && marketCloseCountdown) {
+      marketCloseSection.style.display = 'flex';
+      const secondsUntilClose = getTimeUntilClose(etTime);
+      const hours = Math.floor(secondsUntilClose / 3600);
+      const minutes = Math.floor((secondsUntilClose % 3600) / 60);
+      const secs = secondsUntilClose % 60;
+
+      if (hours > 0) {
+        marketCloseCountdown.textContent = `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      } else {
+        marketCloseCountdown.textContent = `${minutes}:${String(secs).padStart(2, '0')}`;
+      }
+    }
   } else {
-    // Market is closed - show time until open
+    // Market is closed - hide market close countdown
+    if (marketCloseSection) {
+      marketCloseSection.style.display = 'none';
+    }
+
+    // Show time until open
     refreshLabelElement.textContent = 'Opens:';
     const secondsUntilOpen = getTimeUntilOpen(etTime);
     const countdown = formatCountdown(secondsUntilOpen);
     countdownElement.textContent = countdown;
   }
+
+  // Update giant countdown clock
+  updateGiantCountdown();
 }
 
 /**
