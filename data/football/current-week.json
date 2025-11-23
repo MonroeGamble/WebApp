@@ -1,0 +1,169 @@
+{
+  "season": 2024,
+  "week": 13,
+  "lastUpdated": "2024-11-23T15:30:00Z",
+  "games": [
+    {
+      "id": "nfl-2024-w13-chiefs-bills",
+      "league": "NFL",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-24T13:00:00-05:00",
+      "homeTeam": {
+        "id": "buf",
+        "name": "Buffalo Bills",
+        "shortName": "Bills",
+        "abbreviation": "BUF",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/buf.png"
+      },
+      "awayTeam": {
+        "id": "kc",
+        "name": "Kansas City Chiefs",
+        "shortName": "Chiefs",
+        "abbreviation": "KC",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png"
+      },
+      "status": "scheduled",
+      "homeScore": null,
+      "awayScore": null,
+      "quarter": null,
+      "clock": null,
+      "possession": null
+    },
+    {
+      "id": "nfl-2024-w13-lions-bears",
+      "league": "NFL",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-24T16:30:00-05:00",
+      "homeTeam": {
+        "id": "chi",
+        "name": "Chicago Bears",
+        "shortName": "Bears",
+        "abbreviation": "CHI",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png"
+      },
+      "awayTeam": {
+        "id": "det",
+        "name": "Detroit Lions",
+        "shortName": "Lions",
+        "abbreviation": "DET",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/det.png"
+      },
+      "status": "scheduled",
+      "homeScore": null,
+      "awayScore": null,
+      "quarter": null,
+      "clock": null,
+      "possession": null
+    },
+    {
+      "id": "nfl-2024-w13-49ers-seahawks",
+      "league": "NFL",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-24T20:20:00-05:00",
+      "homeTeam": {
+        "id": "sea",
+        "name": "Seattle Seahawks",
+        "shortName": "Seahawks",
+        "abbreviation": "SEA",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png"
+      },
+      "awayTeam": {
+        "id": "sf",
+        "name": "San Francisco 49ers",
+        "shortName": "49ers",
+        "abbreviation": "SF",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png"
+      },
+      "status": "scheduled",
+      "homeScore": null,
+      "awayScore": null,
+      "quarter": null,
+      "clock": null,
+      "possession": null
+    },
+    {
+      "id": "ncaa-2024-w13-michigan-ohio-state",
+      "league": "NCAA",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-23T12:00:00-05:00",
+      "homeTeam": {
+        "id": "ohio-state",
+        "name": "Ohio State Buckeyes",
+        "shortName": "Ohio State",
+        "abbreviation": "OSU",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/194.png"
+      },
+      "awayTeam": {
+        "id": "michigan",
+        "name": "Michigan Wolverines",
+        "shortName": "Michigan",
+        "abbreviation": "MICH",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/130.png"
+      },
+      "status": "in_progress",
+      "homeScore": 21,
+      "awayScore": 17,
+      "quarter": 3,
+      "clock": "8:42",
+      "possession": "home"
+    },
+    {
+      "id": "ncaa-2024-w13-alabama-auburn",
+      "league": "NCAA",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-23T15:30:00-05:00",
+      "homeTeam": {
+        "id": "auburn",
+        "name": "Auburn Tigers",
+        "shortName": "Auburn",
+        "abbreviation": "AUB",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2.png"
+      },
+      "awayTeam": {
+        "id": "alabama",
+        "name": "Alabama Crimson Tide",
+        "shortName": "Alabama",
+        "abbreviation": "ALA",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png"
+      },
+      "status": "scheduled",
+      "homeScore": null,
+      "awayScore": null,
+      "quarter": null,
+      "clock": null,
+      "possession": null
+    },
+    {
+      "id": "ncaa-2024-w13-georgia-georgia-tech",
+      "league": "NCAA",
+      "season": 2024,
+      "week": 13,
+      "startTime": "2024-11-23T19:30:00-05:00",
+      "homeTeam": {
+        "id": "georgia-tech",
+        "name": "Georgia Tech Yellow Jackets",
+        "shortName": "Georgia Tech",
+        "abbreviation": "GT",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/59.png"
+      },
+      "awayTeam": {
+        "id": "georgia",
+        "name": "Georgia Bulldogs",
+        "shortName": "Georgia",
+        "abbreviation": "UGA",
+        "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png"
+      },
+      "status": "scheduled",
+      "homeScore": null,
+      "awayScore": null,
+      "quarter": null,
+      "clock": null,
+      "possession": null
+    }
+  ]
+}
