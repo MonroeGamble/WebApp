@@ -609,11 +609,26 @@ html.iframe-mode {
 html.iframe-mode body {
     height: auto;
     min-height: 100vh;
+    overflow-x: hidden !important;
 }
 
 html.iframe-mode .container {
     height: auto;
     min-height: 100vh;
+    max-height: none !important;
+}
+
+html.iframe-mode .control-panel {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+
+html.iframe-mode .chart-container {
+    min-height: 500px !important;
+}
+
+html.iframe-mode .table-container {
+    overflow-x: auto;
 }
 /* ============================================================================
    INTERACTIVE STOCK CHART STYLES

@@ -75,6 +75,30 @@
             <p>Add up to 10 stock tickers to compare their performance over time.</p>
             <p class="tip">💡 Try adding: AAPL, MSFT, GOOGL, AMZN, or any other ticker symbol</p>
         </div>
+
+        <!-- Stock Data Table -->
+        <div class="table-container" id="stockTableContainer" style="display: none;">
+            <h2>📊 Stock Data Summary</h2>
+            <div class="table-wrapper">
+                <table id="stock-data-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Current Price</th>
+                            <th>Change ($)</th>
+                            <th>Change (%)</th>
+                            <th>Open</th>
+                            <th>High</th>
+                            <th>Low</th>
+                            <th>Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Help Modal -->
