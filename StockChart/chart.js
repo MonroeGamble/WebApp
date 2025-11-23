@@ -13,6 +13,11 @@ const DEFAULT_COLORS = [
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Detect if in iframe and apply iframe mode
+    if (window.self !== window.top) {
+        document.documentElement.classList.add('iframe-mode');
+    }
+
     initializeApp();
 });
 
@@ -29,6 +34,46 @@ function initializeApp() {
         console.log(`Loading chart for ${symbolParam} from URL parameter`);
         document.getElementById('tickerInput').value = symbolParam;
         addTicker();
+    } else {
+        // Auto-load 10 default franchise stocks
+        loadDefaultStocks();
+    }
+}
+
+// Load 10 default franchise stocks
+async function loadDefaultStocks() {
+    const defaultStocks = ['MCD', 'YUM', 'QSR', 'WEN', 'DPZ', 'MAR', 'HLT', 'PLNT', 'SHAK', 'WING'];
+
+    showLoading(true);
+
+    for (const symbol of defaultStocks) {
+        try {
+            const data = await fetchAdjustedPrices(symbol, currentRange);
+
+            if (!data || data.length === 0) {
+                console.warn(`No data available for ${symbol}`);
+                continue;
+            }
+
+            const tickerObj = {
+                symbol: symbol,
+                color: DEFAULT_COLORS[tickers.length % DEFAULT_COLORS.length],
+                lineWidth: 2,
+                data: data
+            };
+
+            tickers.push(tickerObj);
+        } catch (error) {
+            console.error(`Error loading ${symbol}:`, error);
+        }
+    }
+
+    showLoading(false);
+
+    if (tickers.length > 0) {
+        renderTickerList();
+        updateChart();
+        hideEmptyState();
     } else {
         showEmptyState();
     }
@@ -368,6 +413,57 @@ function updateChart() {
     chartInstance.data.datasets = datasets;
     chartInstance.update('none');
     chartInstance.resetZoom();
+
+    // Update the stock data table
+    updateStockTable();
+}
+
+// Update the stock data table
+function updateStockTable() {
+    const tableContainer = document.getElementById('stockTableContainer');
+    const tableBody = document.getElementById('stock-table-body');
+
+    if (!tableBody) return;
+
+    if (tickers.length === 0) {
+        tableContainer.style.display = 'none';
+        return;
+    }
+
+    // Show table
+    tableContainer.style.display = 'block';
+
+    // Clear existing rows
+    tableBody.innerHTML = '';
+
+    // Populate table with stock data
+    tickers.forEach(ticker => {
+        if (!ticker.data || ticker.data.length === 0) return;
+
+        // Get most recent data point and first data point
+        const latestData = ticker.data[ticker.data.length - 1];
+        const firstData = ticker.data[0];
+
+        // Calculate change
+        const priceChange = latestData.price - firstData.price;
+        const percentChange = ((priceChange / firstData.price) * 100).toFixed(2);
+        const changeClass = priceChange >= 0 ? 'positive-change' : 'negative-change';
+        const changeSign = priceChange >= 0 ? '+' : '';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${ticker.symbol}</td>
+            <td>$${latestData.price.toFixed(2)}</td>
+            <td class="${changeClass}">${changeSign}$${priceChange.toFixed(2)}</td>
+            <td class="${changeClass}">${changeSign}${percentChange}%</td>
+            <td>$${(latestData.open || latestData.price).toFixed(2)}</td>
+            <td>$${(latestData.high || latestData.price).toFixed(2)}</td>
+            <td>$${(latestData.low || latestData.price).toFixed(2)}</td>
+            <td>${formatVolume(latestData.volume)}</td>
+        `;
+
+        tableBody.appendChild(row);
+    });
 }
 
 async function fetchAdjustedPrices(ticker, range) {
