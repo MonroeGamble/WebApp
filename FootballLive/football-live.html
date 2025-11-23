@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="description" content="Live NFL and College Football scores, schedules, and community predictions">
+    <meta name="keywords" content="NFL, college football, live scores, predictions, voting">
+    <meta name="robots" content="index, follow">
+
+    <title>Live Football Scores & Predictions - FranResearch</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="football-live.css">
+    <link rel="stylesheet" href="../Website/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="football-header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="../index.html" class="logo-link">
+                    <img src="../logo.svg" alt="FranResearch" class="logo">
+                </a>
+                <div class="header-text">
+                    <h1>🏈 Live Football Scores</h1>
+                    <p class="header-subtitle">NFL & College Football • Week <span id="current-week">--</span></p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="refresh-indicator">
+                    <span class="refresh-dot"></span>
+                    <span id="last-update">--:--</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="filters-container">
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All Games</button>
+            <button class="filter-btn" data-filter="nfl">NFL</button>
+            <button class="filter-btn" data-filter="ncaa">College</button>
+        </div>
+        <div class="view-toggle">
+            <button class="toggle-btn active" data-view="schedule">📅 Schedule</button>
+            <button class="toggle-btn" data-view="live">🔴 Live</button>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading games...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="error-container" style="display: none;">
+        <div class="error-icon">⚠️</div>
+        <h2>Unable to load games</h2>
+        <p id="error-message">Please try again later</p>
+        <button onclick="location.reload()" class="retry-btn">Retry</button>
+    </div>
+
+    <!-- Games Container -->
+    <div id="games-container" class="games-container" style="display: none;">
+        <!-- Games will be dynamically inserted here -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">🏈</div>
+        <h2>No games scheduled</h2>
+        <p>Check back during the football season for live scores and predictions!</p>
+    </div>
+
+    <!-- Vote Modal -->
+    <div id="vote-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Pick the Winner</h3>
+                <button class="modal-close" onclick="closeVoteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="vote-options" class="vote-options">
+                    <!-- Vote buttons will be inserted here -->
+                </div>
+                <div class="vote-stats" id="vote-stats">
+                    <!-- Vote statistics will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="football-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Pages</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../Website/ticker.html">Stock Ticker</a></li>
+                    <li><a href="../StockChart/chart.html">Stock Charts</a></li>
+                    <li><a href="../FranchiseMap/map.html">Franchise Map</a></li>
+                    <li><a href="football-live.html">Live Football</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>About</h3>
+                <p>Live football scores and community predictions powered by real-time data.</p>
+                <p style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">Auto-updates every 60 seconds during games</p>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2024 FranResearch. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="football-live.js"></script>
+</body>
+</html>
