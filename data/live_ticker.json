@@ -39,7 +39,7 @@
       "low": 71.96,
       "open": 72.21,
       "previousClose": 72.22,
-      "timestamp": 1764353646,
+      "timestamp": 1764357390,
       "source": "finnhub"
     },
     "WEN": {
@@ -53,7 +53,7 @@
       "low": 8.44,
       "open": 8.56,
       "previousClose": 8.53,
-      "timestamp": 1764356726,
+      "timestamp": 1764361061,
       "source": "finnhub"
     },
     "DPZ": {
@@ -109,7 +109,7 @@
       "low": 87.2,
       "open": 88.49,
       "previousClose": 88.48,
-      "timestamp": 1764353400,
+      "timestamp": 1764357363,
       "source": "finnhub"
     },
     "DENN": {
@@ -151,7 +151,7 @@
       "low": 4.05,
       "open": 4.07,
       "previousClose": 4.11,
-      "timestamp": 1764355773,
+      "timestamp": 1764361018,
       "source": "finnhub"
     },
     "NATH": {
@@ -235,7 +235,7 @@
       "low": 10.1,
       "open": 10.32,
       "previousClose": 10.1,
-      "timestamp": 1764356126,
+      "timestamp": 1764360914,
       "source": "finnhub"
     },
     "ROL": {
@@ -249,7 +249,7 @@
       "low": 61.39,
       "open": 61.75,
       "previousClose": 61.5,
-      "timestamp": 1764353400,
+      "timestamp": 1764359761,
       "source": "finnhub"
     },
     "PLNT": {
@@ -277,7 +277,7 @@
       "low": 302.95,
       "open": 304.06,
       "previousClose": 304.65,
-      "timestamp": 1764352801,
+      "timestamp": 1764358343,
       "source": "finnhub"
     },
     "HLT": {
@@ -347,7 +347,7 @@
       "low": 54.5,
       "open": 54.82,
       "previousClose": 54.87,
-      "timestamp": 1764355577,
+      "timestamp": 1764357512,
       "source": "finnhub"
     },
     "TNL": {
@@ -375,7 +375,7 @@
       "low": 4.84,
       "open": 4.95,
       "previousClose": 4.94,
-      "timestamp": 1764352800,
+      "timestamp": 1764360412,
       "source": "finnhub"
     },
     "ADUS": {
@@ -431,11 +431,11 @@
       "low": 7.3,
       "open": 7.3,
       "previousClose": 7.31,
-      "timestamp": 1764353400,
+      "timestamp": 1764359526,
       "source": "finnhub"
     }
   },
-  "fetchedAt": "2025-11-28T19:13:52.988033Z",
+  "fetchedAt": "2025-11-28T20:19:46.190783Z",
   "count": 31,
   "source": "finnhub"
 }
