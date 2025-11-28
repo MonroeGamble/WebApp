@@ -140,7 +140,7 @@ Our script:
 1. **Never commit API keys to code**
    ```python
    # ❌ BAD
-   API_KEY = "d4ga5f9r01qm5b34l2s0d4ga5f9r01qm5b34l2sg"
+   API_KEY = XXX
 
    # ✅ GOOD
    API_KEY = os.environ.get('FINNHUB_API_KEY')
