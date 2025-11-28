@@ -200,8 +200,8 @@ Edit `scripts/update_franchise_stocks.py`:
 FRANCHISE_STOCKS = [
     "MCD", "YUM", "QSR", "WEN", "DPZ", "JACK", "WING", "SHAK",
     "DENN", "DIN", "DNUT", "NATH", "RRGB", "DRVN", "HRB", "MCW",
-    "SERV", "ROL", "PLNT", "BFT", "TNL", "MAR", "HLT", "H", "CHH",
-    "WH", "VAC", "RENT", "GNC", "ADUS", "LOPE", "PLAY", "ARCO", "TAST"
+    "SERV", "ROL", "PLNT", "BFT", "MAR", "HLT", "H", "CHH", "WH",
+    "VAC", "TNL", "RENT", "GNC", "ADUS", "LOPE", "PLAY", "ARCO", "TAST"
 ]
 ```
 
