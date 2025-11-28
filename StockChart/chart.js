@@ -492,10 +492,8 @@ async function updateStockTable() {
 
     for (const symbol of symbols) {
         const series = await getLocalSeries(symbol);
-        const sourceSeries = (series && series.length) ? series : (tickers.find(t => t.symbol === symbol)?.data || []);
-
-        if (sourceSeries && sourceSeries.length) {
-            const last30 = sourceSeries.slice(-30);
+        if (series && series.length) {
+            const last30 = series.slice(-30);
             seriesBySymbol[symbol] = last30;
             last30.forEach(point => dateSet.add(point.date.toISOString().split('T')[0]));
         }
