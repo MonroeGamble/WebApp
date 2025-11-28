@@ -331,34 +331,45 @@ class NewsService {
    * @returns {Promise<Array>} Promise resolving to NewsArticle array
    */
   async getAllArticles() {
-    try {
-      // Fetch from static JSON file (updated by GitHub Actions RSS aggregator)
-      const response = await fetch('data/franchise_news.json');
+    const candidateUrls = [
+      new URL('./news.json', document.baseURI).toString(),
+      new URL('../FranchiseNews/news.json', document.baseURI).toString(),
+      'https://monroegamble.github.io/WebApp/FranchiseNews/news.json',
+      new URL('../data/franchise_news.json', document.baseURI).toString()
+    ];
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    for (const url of candidateUrls) {
+      try {
+        const response = await fetch(url, { cache: 'no-cache' });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const rssArticles = await response.json();
+        if (!Array.isArray(rssArticles)) {
+          throw new Error('Unexpected news payload');
+        }
+
+        const articles = rssArticles.map((article, index) => ({
+          id: article.id || `${article.source || 'news'}-${index}`,
+          title: article.title,
+          sourceId: this._normalizeSourceId(article.source || article.source_name || 'news'),
+          url: article.url,
+          publishedAt: (article.published_iso || article.publishedAt || new Date().toISOString()).split('T')[0],
+          category: this._mapRSSCategory(article.category || article.source),
+          shortSourceLabel: article.source || article.source_name || 'News'
+        })).filter(article => Boolean(article.title && article.url));
+
+        if (articles.length) {
+          return articles;
+        }
+      } catch (error) {
+        console.warn(`[NewsService] Failed to fetch ${url}, trying next source`, error);
       }
-
-      const rssArticles = await response.json();
-
-      // Transform RSS aggregator format to widget format
-      const articles = rssArticles.map(article => ({
-        id: article.id,
-        title: article.title,
-        sourceId: this._normalizeSourceId(article.source_name),
-        url: article.url,
-        publishedAt: article.published_iso ? article.published_iso.split('T')[0] : new Date().toISOString().split('T')[0],
-        category: this._mapRSSCategory(article.category),
-        shortSourceLabel: article.source_name
-      }));
-
-      return articles;
-    } catch (error) {
-      console.warn('[NewsService] Failed to fetch franchise_news.json, falling back to mock data:', error);
-
-      // Fallback to mock data if fetch fails (for local development)
-      return MOCK_NEWS_ARTICLES;
     }
+
+    console.warn('[NewsService] Falling back to mock data after all fetch attempts failed');
+    return MOCK_NEWS_ARTICLES;
   }
 
   /**
