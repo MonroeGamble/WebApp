@@ -9,9 +9,9 @@
       "isNegative": true,
       "high": 313.3,
       "low": 310.69,
-      "open": 312.74,
+      "open": 312.37,
       "previousClose": 312.4,
-      "timestamp": 1764355877,
+      "timestamp": 1764363586,
       "source": "finnhub"
     },
     "YUM": {
@@ -23,9 +23,9 @@
       "isNegative": true,
       "high": 154.51,
       "low": 153.06,
-      "open": 153.44,
+      "open": 153.06,
       "previousClose": 153.8,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "QSR": {
@@ -37,9 +37,9 @@
       "isNegative": false,
       "high": 73.13,
       "low": 71.96,
-      "open": 72.21,
+      "open": 72.28,
       "previousClose": 72.22,
-      "timestamp": 1764357390,
+      "timestamp": 1764362973,
       "source": "finnhub"
     },
     "WEN": {
@@ -51,9 +51,9 @@
       "isNegative": true,
       "high": 8.59,
       "low": 8.44,
-      "open": 8.56,
+      "open": 8.57,
       "previousClose": 8.53,
-      "timestamp": 1764361061,
+      "timestamp": 1764363600,
       "source": "finnhub"
     },
     "DPZ": {
@@ -65,7 +65,7 @@
       "isNegative": false,
       "high": 423.99,
       "low": 415.04,
-      "open": 415.53,
+      "open": 416.16,
       "previousClose": 415.59,
       "timestamp": 1764353248,
       "source": "finnhub"
@@ -78,8 +78,8 @@
       "isPositive": true,
       "isNegative": false,
       "high": 19.96,
-      "low": 19.01,
-      "open": 19.01,
+      "low": 19.02,
+      "open": 19.13,
       "previousClose": 19.46,
       "timestamp": 1764352800,
       "source": "finnhub"
@@ -93,7 +93,7 @@
       "isNegative": false,
       "high": 266.43,
       "low": 254.36,
-      "open": 259.25,
+      "open": 259,
       "previousClose": 259.08,
       "timestamp": 1764353406,
       "source": "finnhub"
@@ -107,9 +107,9 @@
       "isNegative": true,
       "high": 89.34,
       "low": 87.2,
-      "open": 88.49,
+      "open": 88.44,
       "previousClose": 88.48,
-      "timestamp": 1764357363,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "DENN": {
@@ -121,7 +121,7 @@
       "isNegative": false,
       "high": 6.18,
       "low": 6.17,
-      "open": 6.18,
+      "open": 6.17,
       "previousClose": 6.17,
       "timestamp": 1764353760,
       "source": "finnhub"
@@ -135,9 +135,9 @@
       "isNegative": true,
       "high": 31.57,
       "low": 30.81,
-      "open": 31.03,
+      "open": 31.25,
       "previousClose": 31.29,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "DNUT": {
@@ -149,9 +149,9 @@
       "isNegative": false,
       "high": 4.24,
       "low": 4.05,
-      "open": 4.07,
+      "open": 4.11,
       "previousClose": 4.11,
-      "timestamp": 1764361018,
+      "timestamp": 1764363081,
       "source": "finnhub"
     },
     "NATH": {
@@ -163,7 +163,7 @@
       "isNegative": false,
       "high": 92.92,
       "low": 91.23,
-      "open": 91.49,
+      "open": 91.98,
       "previousClose": 91.73,
       "timestamp": 1764352800,
       "source": "finnhub"
@@ -177,9 +177,9 @@
       "isNegative": true,
       "high": 4.45,
       "low": 4.29,
-      "open": 4.32,
+      "open": 4.43,
       "previousClose": 4.4,
-      "timestamp": 1764352800,
+      "timestamp": 1764363600,
       "source": "finnhub"
     },
     "DRVN": {
@@ -191,7 +191,7 @@
       "isNegative": true,
       "high": 14.75,
       "low": 14.56,
-      "open": 14.56,
+      "open": 14.64,
       "previousClose": 14.67,
       "timestamp": 1764352801,
       "source": "finnhub"
@@ -205,9 +205,9 @@
       "isNegative": false,
       "high": 42.2,
       "low": 41.49,
-      "open": 41.87,
+      "open": 41.72,
       "previousClose": 41.72,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "MCW": {
@@ -219,9 +219,9 @@
       "isNegative": false,
       "high": 5.38,
       "low": 5.29,
-      "open": 5.34,
+      "open": 5.32,
       "previousClose": 5.32,
-      "timestamp": 1764355253,
+      "timestamp": 1764363245,
       "source": "finnhub"
     },
     "SERV": {
@@ -233,9 +233,9 @@
       "isNegative": false,
       "high": 10.4,
       "low": 10.1,
-      "open": 10.32,
+      "open": 10.29,
       "previousClose": 10.1,
-      "timestamp": 1764360914,
+      "timestamp": 1764363600,
       "source": "finnhub"
     },
     "ROL": {
@@ -247,9 +247,9 @@
       "isNegative": true,
       "high": 61.84,
       "low": 61.39,
-      "open": 61.75,
+      "open": 61.39,
       "previousClose": 61.5,
-      "timestamp": 1764359761,
+      "timestamp": 1764363600,
       "source": "finnhub"
     },
     "PLNT": {
@@ -261,9 +261,9 @@
       "isNegative": false,
       "high": 113.12,
       "low": 111.51,
-      "open": 111.89,
+      "open": 111.71,
       "previousClose": 111.84,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "MAR": {
@@ -275,7 +275,7 @@
       "isNegative": false,
       "high": 305.14,
       "low": 302.95,
-      "open": 304.06,
+      "open": 303.9,
       "previousClose": 304.65,
       "timestamp": 1764358343,
       "source": "finnhub"
@@ -289,9 +289,9 @@
       "isNegative": true,
       "high": 287.39,
       "low": 284.21,
-      "open": 286.39,
+      "open": 285,
       "previousClose": 285.77,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "H": {
@@ -303,9 +303,9 @@
       "isNegative": true,
       "high": 166.5,
       "low": 163.59,
-      "open": 165.81,
+      "open": 166.03,
       "previousClose": 166.05,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "CHH": {
@@ -317,9 +317,9 @@
       "isNegative": true,
       "high": 91.7,
       "low": 90.72,
-      "open": 91.27,
+      "open": 91.17,
       "previousClose": 91.41,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "WH": {
@@ -331,9 +331,9 @@
       "isNegative": true,
       "high": 73.95,
       "low": 72.97,
-      "open": 73.89,
+      "open": 73.6,
       "previousClose": 73.84,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "VAC": {
@@ -345,9 +345,9 @@
       "isNegative": true,
       "high": 55.29,
       "low": 54.5,
-      "open": 54.82,
+      "open": 54.87,
       "previousClose": 54.87,
-      "timestamp": 1764357512,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "TNL": {
@@ -359,9 +359,9 @@
       "isNegative": false,
       "high": 68.79,
       "low": 68.21,
-      "open": 68.25,
+      "open": 68.24,
       "previousClose": 68.35,
-      "timestamp": 1764353400,
+      "timestamp": 1764361800,
       "source": "finnhub"
     },
     "RENT": {
@@ -387,7 +387,7 @@
       "isNegative": true,
       "high": 121.16,
       "low": 119.16,
-      "open": 120.09,
+      "open": 121.16,
       "previousClose": 120.92,
       "timestamp": 1764352801,
       "source": "finnhub"
@@ -401,7 +401,7 @@
       "isNegative": false,
       "high": 159.21,
       "low": 155.87,
-      "open": 157.61,
+      "open": 157.36,
       "previousClose": 156.43,
       "timestamp": 1764352801,
       "source": "finnhub"
@@ -415,7 +415,7 @@
       "isNegative": false,
       "high": 18.1,
       "low": 17.25,
-      "open": 17.38,
+      "open": 17.45,
       "previousClose": 17.4,
       "timestamp": 1764355982,
       "source": "finnhub"
@@ -429,13 +429,13 @@
       "isNegative": false,
       "high": 7.61,
       "low": 7.3,
-      "open": 7.3,
+      "open": 7.31,
       "previousClose": 7.31,
-      "timestamp": 1764359526,
+      "timestamp": 1764361800,
       "source": "finnhub"
     }
   },
-  "fetchedAt": "2025-11-28T20:19:46.190783Z",
+  "fetchedAt": "2025-11-28T21:15:22.063977Z",
   "count": 31,
   "source": "finnhub"
 }
