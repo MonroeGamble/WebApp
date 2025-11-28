@@ -1,46 +1,27 @@
 name: Update Sports Scores
-  on:
-    schedule:
-      - cron: "0 9,15,21 * * 1-5" # Monday to Friday only
-    workflow_dispatch: # Allow manual trigger
+
+on:
+  schedule:
+    - cron: "0 9,15,21 * * 1-5"  # Monday–Friday at 09:00, 15:00, 21:00 UTC
+  workflow_dispatch:             # Allow manual trigger
 
 jobs:
-  fetch-scores:
+  update-sports-scores:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '18'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          npm install --prefix scripts node-fetch@3
+          pip install -r requirements.txt
 
-      - name: Fetch sports scores
-        env:
-          FOOTBALL_API_KEY: ${{ secrets.FOOTBALL_API_KEY }}
+      - name: Update sports scores
         run: |
-          node scripts/fetch_football_scores.js
-
-      - name: Commit and push if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/football/current-week.json
-
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update sports scores - $(date +'%Y-%m-%d %H:%M UTC')"
-            git push
-            echo "✅ Sports scores updated and pushed"
-          fi
+          python scripts/update_sports_scores.py
