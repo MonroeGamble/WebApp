@@ -6,7 +6,6 @@ let showLegend = true;
 let showGrid = true;
 let historicalCache = new Map();
 let customCache = {};
-let priceMode = 'percent';
 
 const MAX_TICKERS = 10;
 const DEFAULT_STOCKS = ['MCD', 'YUM', 'QSR', 'WEN', 'DPZ', 'JACK', 'WING', 'SHAK', 'DENN', 'DIN'];
@@ -214,11 +213,7 @@ function initializeChart() {
                             if (firstPoint && currentPoint) {
                                 const delta = currentPoint.price - firstPoint.price;
                                 const pct = (delta / firstPoint.price) * 100;
-                                if (priceMode === 'percent') {
-                                    label += ` (${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% from start)`;
-                                } else {
-                                    label += ` (${delta >= 0 ? '+' : ''}${delta.toFixed(2)}, ${pct.toFixed(2)}%)`;
-                                }
+                                label += ` (${delta >= 0 ? '+' : ''}${delta.toFixed(2)}, ${pct.toFixed(2)}%)`;
                             }
 
                             return label;
@@ -517,10 +512,8 @@ async function updateStockTable() {
 
     for (const symbol of symbols) {
         const series = await getLocalSeries(symbol);
-        const sourceSeries = (series && series.length) ? series : (tickers.find(t => t.symbol === symbol)?.data || []);
-
-        if (sourceSeries && sourceSeries.length) {
-            const last30 = sourceSeries.slice(-30);
+        if (series && series.length) {
+            const last30 = series.slice(-30);
             seriesBySymbol[symbol] = last30;
             last30.forEach(point => dateSet.add(point.date.toISOString().split('T')[0]));
         }

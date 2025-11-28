@@ -14,14 +14,40 @@
     <link rel="stylesheet" href="map-style.css">
 </head>
 <body>
-    <main class="page-container">
-        <section class="section-header" style="align-items:center;">
-            <div>
+    <div class="global-ticker">
+        <iframe src="../Website/ticker.html" title="Franchise stock ticker" loading="lazy"></iframe>
+    </div>
+    <div class="map-container">
+        <!-- Header -->
+        <div class="map-header">
+            <div class="header-left">
+                <a href="../index.html" class="logo-link">
+                    <img src="../logo.svg" alt="FranResearch" class="logo">
+                </a>
                 <h1>Interactive Franchise Map</h1>
                 <p class="section-subtitle">Leaflet tiles with brand filtering and refreshed layout.</p>
             </div>
-            <a class="btn-secondary" href="../index.html">← Back home</a>
-        </section>
+            <div class="header-controls">
+                <select id="brand-filter" class="filter-select">
+                    <option value="all">All Brands</option>
+                    <option value="MCD">McDonald's (MCD)</option>
+                    <option value="YUM">Yum! Brands (YUM)</option>
+                    <option value="QSR">Restaurant Brands (QSR)</option>
+                    <option value="WEN">Wendy's (WEN)</option>
+                    <option value="DPZ">Domino's (DPZ)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Map -->
+        <div id="map"></div>
+
+        <!-- Map Attribution -->
+        <div class="map-attribution">
+            © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors
+            • Powered by <a href="https://leafletjs.com" target="_blank">Leaflet</a>
+            <span class="map-hint">Use two fingers to move the map on mobile</span>
+        </div>
 
         <div class="map-container card">
             <div class="map-header">

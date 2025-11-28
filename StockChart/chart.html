@@ -16,9 +16,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 </head>
 <body>
-    <main class="page-container">
-        <section class="section-header" style="align-items: center;">
-            <div>
+    <div class="global-ticker">
+        <iframe src="../Website/ticker.html" title="Franchise stock ticker" loading="lazy"></iframe>
+    </div>
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="panel-header">
                 <h1>📈 Interactive Stock Chart</h1>
                 <p class="section-subtitle">Percent-change by default with adjustable ranges, legend toggles, and embeds.</p>
             </div>
@@ -91,27 +95,25 @@
                     <p class="tip">💡 Try adding: AAPL, MSFT, GOOGL, AMZN, or any other ticker symbol</p>
                 </div>
 
-                <!-- Stock Data Table -->
-                <div class="table-container" id="stockTableContainer" style="display: none;">
-                    <div class="table-header">
-                        <div>
-                            <h2>📊 30-Day Adjusted Close Snapshot</h2>
-                            <p class="table-subtitle">Data auto-populates from the local franchise database before calling external APIs.</p>
-                        </div>
-                        <div class="embed-wrapper">
-                            <label for="embedCode">Embed this chart anywhere</label>
-                            <textarea id="embedCode" readonly></textarea>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="stock-data-table">
-                            <thead id="stock-table-head"></thead>
-                            <tbody id="stock-table-body">
-                                <!-- Data will be populated by JavaScript -->
-                            </tbody>
-                        </table>
-                    </div>
+        <!-- Stock Data Table -->
+        <div class="table-container" id="stockTableContainer" style="display: none;">
+            <div class="table-header">
+                <div>
+                    <h2>📊 30-Day Adjusted Close Snapshot</h2>
+                    <p class="table-subtitle">Data auto-populates from the local franchise database before calling external APIs.</p>
                 </div>
+                <div class="embed-wrapper">
+                    <label for="embedCode">Embed this chart anywhere</label>
+                    <textarea id="embedCode" readonly></textarea>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="stock-data-table">
+                    <thead id="stock-table-head"></thead>
+                    <tbody id="stock-table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>

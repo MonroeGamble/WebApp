@@ -7,10 +7,12 @@ const TICKER_SYMBOLS = [
   "MCD", "YUM", "QSR", "WEN", "DPZ", "JACK", "WING", "SHAK",
   "DENN", "DIN", "DNUT", "NATH", "RRGB",
   "DRVN", "HRB", "MCW", "SERV", "ROL",
-  "PLNT", "BFT", "TNL",
-  "MAR", "HLT", "H", "CHH", "WH", "VAC",
-  "RENT", "GNC", "ADUS", "LOPE",
-  "PLAY", "ARCO", "TAST"
+  "PLNT", "BFT",
+  "MAR", "HLT", "H", "CHH", "WH", "VAC", "TNL",
+  "RENT", "GNC",
+  "ADUS", "LOPE",
+  "PLAY", "ARCO",
+  "TAST"
 ];
 
 // Refresh interval in milliseconds (1 hour = 3600 seconds)
@@ -108,27 +110,19 @@ async function fetchLiveTickerData() {
     const snapshots = await loadHistoricalSnapshots();
 
     for (const [symbol, quote] of Object.entries(data.quotes)) {
-      const priceNumber = typeof quote.price === 'number' && Number.isFinite(quote.price)
-        ? quote.price
-        : null;
-
-      let changePercent = typeof quote.changePercent === 'number' && Number.isFinite(quote.changePercent)
-        ? quote.changePercent
-        : null;
+      let changePercent = quote.changePercent;
 
       const snapshot = snapshots[symbol];
-      if (snapshot && snapshot.previous && snapshot.latest && snapshot.previous !== 0) {
+      if (snapshot && snapshot.previous && snapshot.latest) {
         changePercent = ((snapshot.latest - snapshot.previous) / snapshot.previous) * 100;
       }
 
-      const formattedChange = Number.isFinite(changePercent) ? changePercent.toFixed(2) : '–';
-
       stockData[symbol] = {
         symbol: quote.symbol,
-        price: priceNumber !== null ? priceNumber.toFixed(2) : 'N/A',
-        changePercent: formattedChange,
-        isPositive: Number.isFinite(changePercent) ? changePercent > 0 : false,
-        isNegative: Number.isFinite(changePercent) ? changePercent < 0 : false,
+        price: quote.price.toFixed(2),
+        changePercent: Number.isFinite(changePercent) ? changePercent.toFixed(2) : '–',
+        isPositive: changePercent > 0,
+        isNegative: changePercent < 0,
         afterHours: false,
         source: 'finnhub',
         fetchedAt: data.fetchedAt
