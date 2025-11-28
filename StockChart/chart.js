@@ -4,14 +4,17 @@ let tickers = [];
 let currentRange = '1y';
 let showLegend = true;
 let showGrid = true;
+let priceMode = 'percent'; // 'percent' or 'dollar' - default to percent
 let historicalCache = new Map();
 let customCache = {};
 
 const MAX_TICKERS = 10;
-const DEFAULT_STOCKS = ['MCD', 'YUM', 'QSR', 'WEN', 'DPZ', 'JACK', 'WING', 'SHAK', 'DENN', 'DIN'];
+// Default stocks: SPY (market index) in black, then 9 franchise stocks
+const DEFAULT_STOCKS = ['SPY', 'MCD', 'YUM', 'QSR', 'WEN', 'DPZ', 'JACK', 'WING', 'SHAK', 'DENN'];
 const DEFAULT_COLORS = [
+    '#000000', // SPY in black (market index)
     '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
-    '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#84CC16'
+    '#EC4899', '#14B8A6', '#F97316', '#06B6D4'
 ];
 
 // Initialize when DOM is loaded
@@ -53,14 +56,15 @@ function initializeApp() {
 
 async function loadPresetSymbols(symbols) {
     showLoading(true);
-    for (const symbol of symbols) {
+    for (let i = 0; i < symbols.length; i++) {
+        const symbol = symbols[i];
         try {
             const data = await fetchAdjustedPrices(symbol, currentRange);
             if (data && data.length) {
                 tickers.push({
                     symbol,
-                    color: DEFAULT_COLORS[tickers.length % DEFAULT_COLORS.length],
-                    lineWidth: 2,
+                    color: DEFAULT_COLORS[i % DEFAULT_COLORS.length],
+                    lineWidth: symbol === 'SPY' ? 3 : 2,
                     data
                 });
             }
@@ -82,7 +86,8 @@ async function loadPresetSymbols(symbols) {
 async function loadDefaultStocks() {
     showLoading(true);
 
-    for (const symbol of DEFAULT_STOCKS) {
+    for (let i = 0; i < DEFAULT_STOCKS.length; i++) {
+        const symbol = DEFAULT_STOCKS[i];
         try {
             const data = await fetchAdjustedPrices(symbol, currentRange);
 
@@ -93,8 +98,8 @@ async function loadDefaultStocks() {
 
             const tickerObj = {
                 symbol: symbol,
-                color: DEFAULT_COLORS[tickers.length % DEFAULT_COLORS.length],
-                lineWidth: 2,
+                color: DEFAULT_COLORS[i],
+                lineWidth: symbol === 'SPY' ? 3 : 2, // SPY thicker as market reference
                 data: data
             };
 
@@ -136,11 +141,13 @@ function setupEventListeners() {
     document.getElementById('resetZoomBtn').addEventListener('click', resetZoom);
     document.getElementById('toggleLegendBtn').addEventListener('click', toggleLegend);
     document.getElementById('showGridLines').addEventListener('change', toggleGridLines);
+
+    // Price mode toggle
     const togglePriceBtn = document.getElementById('togglePriceMode');
     if (togglePriceBtn) {
         togglePriceBtn.addEventListener('click', () => {
             priceMode = priceMode === 'percent' ? 'dollar' : 'percent';
-            togglePriceBtn.textContent = priceMode === 'percent' ? 'Show Dollar Prices' : 'Show % Change';
+            togglePriceBtn.textContent = priceMode === 'percent' ? 'Show $ Prices' : 'Show % Change';
             updateChart();
         });
     }
@@ -213,7 +220,7 @@ function initializeChart() {
                             if (firstPoint && currentPoint) {
                                 const delta = currentPoint.price - firstPoint.price;
                                 const pct = (delta / firstPoint.price) * 100;
-                                label += ` (${delta >= 0 ? '+' : ''}${delta.toFixed(2)}, ${pct.toFixed(2)}%)`;
+                                label += ` (${delta >= 0 ? '+' : ''}$${delta.toFixed(2)}, ${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
                             }
 
                             return label;
@@ -281,7 +288,7 @@ function initializeChart() {
                 y: {
                     title: {
                         display: true,
-                        text: priceMode === 'percent' ? '% Change' : 'Price (USD)',
+                        text: priceMode === 'percent' ? '% Change from Start' : 'Price (USD)',
                         font: {
                             size: 14,
                             weight: '600'
@@ -289,7 +296,7 @@ function initializeChart() {
                     },
                     ticks: {
                         callback: function(value) {
-                            return priceMode === 'percent' ? `${value.toFixed(2)}%` : '$' + value.toFixed(2);
+                            return priceMode === 'percent' ? `${value.toFixed(1)}%` : '$' + value.toFixed(2);
                         }
                     },
                     grid: {
@@ -377,7 +384,7 @@ function renderTickerList() {
     }
 
     container.innerHTML = tickers.map(ticker => `
-        <div class="ticker-item">
+        <div class="ticker-item" style="border-left: 4px solid ${ticker.color};">
             <div class="ticker-info">
                 <input type="color"
                        class="color-picker"
@@ -385,6 +392,7 @@ function renderTickerList() {
                        onchange="updateTickerColor('${ticker.symbol}', this.value)"
                        title="Change line color">
                 <span class="ticker-symbol">${ticker.symbol}</span>
+                ${ticker.symbol === 'SPY' ? '<span style="font-size: 10px; color: #666; margin-left: 5px;">(Market)</span>' : ''}
             </div>
             <div class="ticker-controls">
                 <label class="width-control">
@@ -476,9 +484,9 @@ async function updateChart() {
     });
 
     chartInstance.data.datasets = datasets;
-    chartInstance.options.scales.y.title.text = priceMode === 'percent' ? '% Change' : 'Price (USD)';
+    chartInstance.options.scales.y.title.text = priceMode === 'percent' ? '% Change from Start' : 'Price (USD)';
     chartInstance.options.scales.y.ticks.callback = function(value) {
-        return priceMode === 'percent' ? `${value.toFixed(2)}%` : '$' + value.toFixed(2);
+        return priceMode === 'percent' ? `${value.toFixed(1)}%` : '$' + value.toFixed(2);
     };
 
     chartInstance.update('none');
@@ -489,13 +497,13 @@ async function updateChart() {
     updateEmbedSnippet();
 }
 
-// Update the stock data table
+// Update the stock data table with historical prices and daily percent changes
 async function updateStockTable() {
     const tableContainer = document.getElementById('stockTableContainer');
     const tableBody = document.getElementById('stock-table-body');
     const tableHead = document.getElementById('stock-table-head');
 
-    if (!tableBody || !tableHead) return;
+    if (!tableBody || !tableHead || !tableContainer) return;
 
     if (tickers.length === 0) {
         tableContainer.style.display = 'none';
@@ -521,22 +529,61 @@ async function updateStockTable() {
 
     const dates = Array.from(dateSet).sort((a, b) => b.localeCompare(a)).slice(0, 30).reverse();
 
+    // Create header row with Price and Change columns for each symbol
     const headerRow = document.createElement('tr');
-    headerRow.innerHTML = `<th>Date</th>${symbols.map(s => `<th>${s}</th>`).join('')}`;
+    let headerHTML = '<th>Date</th>';
+    symbols.forEach(s => {
+        headerHTML += `<th colspan="2" style="text-align: center; border-left: 2px solid #e0e0e0;">${s}</th>`;
+    });
+    headerRow.innerHTML = headerHTML;
     tableHead.appendChild(headerRow);
 
-    dates.forEach(dateStr => {
+    // Create sub-header for Price/Change
+    const subHeaderRow = document.createElement('tr');
+    let subHeaderHTML = '<th></th>';
+    symbols.forEach(() => {
+        subHeaderHTML += `<th style="border-left: 2px solid #e0e0e0;">Price</th><th>Daily %</th>`;
+    });
+    subHeaderRow.innerHTML = subHeaderHTML;
+    tableHead.appendChild(subHeaderRow);
+
+    // Create data rows
+    dates.forEach((dateStr, dateIdx) => {
         const row = document.createElement('tr');
-        const cells = [`<td>${dateStr}</td>`];
+        let cellsHTML = `<td style="font-weight: 600;">${formatDateShort(dateStr)}</td>`;
 
         symbols.forEach(symbol => {
-            const point = (seriesBySymbol[symbol] || []).find(p => p.date.toISOString().startsWith(dateStr));
-            cells.push(`<td>${point ? `$${point.price.toFixed(2)}` : '–'}</td>`);
+            const series = seriesBySymbol[symbol] || [];
+            const point = series.find(p => p.date.toISOString().startsWith(dateStr));
+            const prevDateStr = dates[dateIdx - 1];
+            const prevPoint = prevDateStr ? series.find(p => p.date.toISOString().startsWith(prevDateStr)) : null;
+
+            let priceStr = '–';
+            let changeStr = '–';
+            let changeClass = '';
+
+            if (point) {
+                priceStr = `$${point.price.toFixed(2)}`;
+
+                if (prevPoint) {
+                    const change = ((point.price - prevPoint.price) / prevPoint.price) * 100;
+                    changeStr = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+                    changeClass = change >= 0 ? 'positive-change' : 'negative-change';
+                }
+            }
+
+            cellsHTML += `<td style="border-left: 2px solid #e0e0e0;">${priceStr}</td>`;
+            cellsHTML += `<td class="${changeClass}">${changeStr}</td>`;
         });
 
-        row.innerHTML = cells.join('');
+        row.innerHTML = cellsHTML;
         tableBody.appendChild(row);
     });
+}
+
+function formatDateShort(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 async function fetchAdjustedPrices(ticker, range) {
@@ -675,52 +722,41 @@ function filterDataByRange(data, range) {
 
     switch (range) {
         case '1d':
-            // Last trading day
             return data.slice(-1);
         case '5d':
-            // Last 5 trading days (approximately 1 week)
             return data.slice(-5);
         case '1mo':
-            // Last ~30 days
             cutoffDate = new Date(now);
             cutoffDate.setDate(cutoffDate.getDate() - 30);
             break;
         case '6mo':
-            // Last ~180 days
             cutoffDate = new Date(now);
             cutoffDate.setDate(cutoffDate.getDate() - 180);
             break;
         case 'ytd':
-            // Year to date
             cutoffDate = startOfYear;
             break;
         case '1y':
-            // Last 365 days
             cutoffDate = new Date(now);
             cutoffDate.setFullYear(cutoffDate.getFullYear() - 1);
             break;
         case '2y':
-            // Last 2 years
             cutoffDate = new Date(now);
             cutoffDate.setFullYear(cutoffDate.getFullYear() - 2);
             break;
         case '5y':
-            // Last 5 years
             cutoffDate = new Date(now);
             cutoffDate.setFullYear(cutoffDate.getFullYear() - 5);
             break;
         case '10y':
-            // Last 10 years
             cutoffDate = new Date(now);
             cutoffDate.setFullYear(cutoffDate.getFullYear() - 10);
             break;
         case 'max':
         default:
-            // Return all data
             return data;
     }
 
-    // Filter data after cutoff date
     return data.filter(d => d.date >= cutoffDate);
 }
 
@@ -784,7 +820,7 @@ function updateEmbedSnippet() {
     if (!embed) return;
     const symbolsParam = tickers.length ? `?symbols=${tickers.map(t => t.symbol).join(',')}` : '';
     const src = `https://monroegamble.github.io/WebApp/StockChart/chart.html${symbolsParam}`;
-    embed.value = `<iframe src="${src}" width="100%" height="640" frameborder="0" style="border:none;"></iframe>`;
+    embed.value = `<iframe src="${src}" width="100%" height="900" frameborder="0" style="border:none;"></iframe>`;
 }
 
 // Make functions available globally for inline event handlers
