@@ -11,7 +11,7 @@
       "low": 310.69,
       "open": 312.74,
       "previousClose": 312.4,
-      "timestamp": 1764354210,
+      "timestamp": 1764355877,
       "source": "finnhub"
     },
     "YUM": {
@@ -53,7 +53,7 @@
       "low": 8.44,
       "open": 8.56,
       "previousClose": 8.53,
-      "timestamp": 1764354148,
+      "timestamp": 1764356726,
       "source": "finnhub"
     },
     "DPZ": {
@@ -151,7 +151,7 @@
       "low": 4.05,
       "open": 4.07,
       "previousClose": 4.11,
-      "timestamp": 1764352837,
+      "timestamp": 1764355773,
       "source": "finnhub"
     },
     "NATH": {
@@ -221,7 +221,7 @@
       "low": 5.29,
       "open": 5.34,
       "previousClose": 5.32,
-      "timestamp": 1764353384,
+      "timestamp": 1764355253,
       "source": "finnhub"
     },
     "SERV": {
@@ -235,7 +235,7 @@
       "low": 10.1,
       "open": 10.32,
       "previousClose": 10.1,
-      "timestamp": 1764354107,
+      "timestamp": 1764356126,
       "source": "finnhub"
     },
     "ROL": {
@@ -347,7 +347,7 @@
       "low": 54.5,
       "open": 54.82,
       "previousClose": 54.87,
-      "timestamp": 1764353400,
+      "timestamp": 1764355577,
       "source": "finnhub"
     },
     "TNL": {
@@ -417,7 +417,7 @@
       "low": 17.25,
       "open": 17.38,
       "previousClose": 17.4,
-      "timestamp": 1764352800,
+      "timestamp": 1764355982,
       "source": "finnhub"
     },
     "ARCO": {
@@ -435,7 +435,7 @@
       "source": "finnhub"
     }
   },
-  "fetchedAt": "2025-11-28T18:25:13.558732Z",
+  "fetchedAt": "2025-11-28T19:13:52.988033Z",
   "count": 31,
   "source": "finnhub"
 }
