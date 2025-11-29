@@ -332,17 +332,34 @@ class NewsService {
    */
   async getAllArticles() {
     try {
-        // Fetch from static JSON file (updated by GitHub Actions RSS aggregator)
-        const dataUrl = new URL('../data/franchise_news.json', document.baseURI).toString();
-        const response = await fetch(dataUrl);
+      // Fetch from static JSON file (updated by GitHub Actions RSS aggregator)
+      const dataUrl = new URL('../data/franchise_news.json', document.baseURI).toString();
+      const response = await fetch(dataUrl);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }
 
-    console.warn('[NewsService] Falling back to mock data after all fetch attempts failed');
-    return MOCK_NEWS_ARTICLES;
+      const data = await response.json();
+
+      // Transform RSS data to match our article format
+      if (Array.isArray(data)) {
+        return data.map((item, index) => ({
+          id: `rss-${index}-${Date.now()}`,
+          title: item.title || 'Untitled',
+          sourceId: this._normalizeSourceId(item.source || 'unknown'),
+          url: item.link || item.url || '#',
+          publishedAt: item.published ? item.published.split('T')[0] : new Date().toISOString().split('T')[0],
+          category: this._mapRSSCategory(item.category || 'trade_press'),
+          shortSourceLabel: item.source || 'News'
+        }));
+      }
+
+      return MOCK_NEWS_ARTICLES;
+    } catch (error) {
+      console.warn('[NewsService] Falling back to mock data:', error.message);
+      return MOCK_NEWS_ARTICLES;
+    }
   }
 
   /**

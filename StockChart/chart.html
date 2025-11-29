@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Interactive Stock Chart</title>
+    <title>Interactive Stock Chart - FranResearch</title>
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Date Adapter -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <!-- Chart.js Zoom Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 </head>
@@ -48,6 +50,7 @@
 
             <!-- Chart Controls -->
             <div class="chart-controls">
+                <button id="togglePriceMode" class="btn btn-secondary">Show $ Prices</button>
                 <button id="resetZoomBtn" class="btn btn-secondary">Reset Zoom</button>
                 <button id="toggleLegendBtn" class="btn btn-secondary">Toggle Legend</button>
                 <label class="checkbox-label">
@@ -70,10 +73,30 @@
 
         <!-- Empty State -->
         <div id="emptyState" class="empty-state">
-            <div class="empty-icon">Chart</div>
+            <div class="empty-icon">📈</div>
             <h2>Start Building Your Chart</h2>
             <p>Add up to 10 stock tickers to compare their performance over time.</p>
-            <p class="tip">Try adding: AAPL, MSFT, GOOGL, AMZN, or any other ticker symbol</p>
+            <p class="tip">Default: SPY (market benchmark in black) + 9 franchise stocks</p>
+        </div>
+
+        <!-- Historical Data Table -->
+        <div id="stockTableContainer" class="table-container" style="display: none;">
+            <div class="table-header">
+                <div>
+                    <h2>Historical Stock Prices</h2>
+                    <p class="table-subtitle">Last 30 trading days with daily percent changes</p>
+                </div>
+                <div class="embed-wrapper">
+                    <label for="embedCode" style="font-weight: 600; color: #333;">Embed Code:</label>
+                    <textarea id="embedCode" readonly onclick="this.select()"></textarea>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="stock-data-table">
+                    <thead id="stock-table-head"></thead>
+                    <tbody id="stock-table-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -91,6 +114,24 @@
                         <li>The stock will appear in your list with a color indicator</li>
                         <li>You can add up to 10 tickers at once</li>
                     </ol>
+                </section>
+
+                <section>
+                    <h3>Default Stocks</h3>
+                    <p>By default, the chart shows:</p>
+                    <ul>
+                        <li><strong>SPY (Black):</strong> S&P 500 ETF as market benchmark</li>
+                        <li><strong>9 Franchise Stocks:</strong> MCD, YUM, QSR, WEN, DPZ, JACK, WING, SHAK, DENN</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3>Chart Modes</h3>
+                    <ul>
+                        <li><strong>% Change (Default):</strong> Shows relative performance from start date</li>
+                        <li><strong>$ Prices:</strong> Shows actual stock prices</li>
+                        <li>Click "Show $ Prices" / "Show % Change" to toggle</li>
+                    </ul>
                 </section>
 
                 <section>
@@ -118,7 +159,7 @@
                     <div class="code-snippet">
 &lt;iframe src="https://monroegamble.github.io/WebApp/StockChart/chart.html"
         width="100%"
-        height="600"
+        height="900"
         frameborder="0"
         style="border:none;"&gt;
 &lt;/iframe&gt;
