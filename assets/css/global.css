@@ -1,15 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ============================================================================
+   FRANRESEARCH DESIGN SYSTEM
+   Based on UX Research: Hick's Law, Fitts' Law, Gestalt Principles, Jakob's Law
+   ============================================================================ */
 
 :root {
+  /* Color Palette - Limited to reduce cognitive load */
   --bg: #0f172a;
-  --card: #1e293b;
+  --bg-elevated: #1e293b;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-solid: #1e293b;
   --text: #f8fafc;
-  --text-muted: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-secondary: #cbd5e1;
   --accent1: #6366f1;
   --accent2: #a855f7;
+  --accent-green: #22c55e;
+  --accent-red: #ef4444;
   --gradient: linear-gradient(135deg, var(--accent1), var(--accent2));
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --radius: 14px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.4);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+
+  /* Spacing Scale (4px base) - Gestalt: Consistent spacing creates rhythm */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Typography Scale - Visual Hierarchy for F-pattern scanning */
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-base: 16px;
+  --font-lg: 18px;
+  --font-xl: 20px;
+  --font-2xl: 24px;
+  --font-3xl: 30px;
+  --font-4xl: 36px;
+  --font-5xl: 48px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Z-index layers - Jakob's Law: Predictable stacking */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal: 400;
+  --z-tooltip: 500;
 }
 
 * {
@@ -191,4 +242,347 @@ button:hover,
   h2 { font-size: 22px; }
   .hero { padding: 64px 20px 36px; }
   .section-container { padding: 48px 0; }
+}
+
+/* ============================================================================
+   GLOBAL NAVIGATION - Hick's Law: Limit choices to 5-7 items
+   ============================================================================ */
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.site-nav .nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--font-lg);
+  color: var(--text);
+}
+
+.site-nav .nav-brand img {
+  height: 32px;
+  width: auto;
+}
+
+.site-nav .nav-links {
+  display: flex;
+  gap: var(--space-5);
+  margin-left: auto;
+}
+
+.site-nav .nav-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--font-sm);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.site-nav .nav-link:hover,
+.site-nav .nav-link.active {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.site-nav .nav-link.active {
+  color: var(--accent1);
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+  .site-nav {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .site-nav .nav-links {
+    width: 100%;
+    overflow-x: auto;
+    gap: var(--space-3);
+    padding-bottom: var(--space-2);
+  }
+
+  .site-nav .nav-link {
+    font-size: var(--font-xs);
+    white-space: nowrap;
+  }
+}
+
+/* ============================================================================
+   TICKER WRAPPER - Maintains ticker structure, only adjusts positioning
+   ============================================================================ */
+
+.ticker-wrapper-global {
+  background: #0a0a0a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================================================
+   TOOL CARDS - Fitts' Law: Large touch targets, clear affordances
+   ============================================================================ */
+
+.tool-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-5);
+}
+
+.tool-card-link {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6);
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+
+.tool-card-link:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.tool-card-link .card-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-4);
+}
+
+.tool-card-link .card-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-2);
+}
+
+.tool-card-link .card-desc {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tool-card-link .card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--accent1);
+}
+
+.tool-card-link .card-action::after {
+  content: '→';
+  transition: transform var(--transition-fast);
+}
+
+.tool-card-link:hover .card-action::after {
+  transform: translateX(4px);
+}
+
+/* ============================================================================
+   STATS ROW - Gestalt: Proximity groups related items
+   ============================================================================ */
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-10);
+  flex-wrap: wrap;
+  padding: var(--space-8) 0;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: var(--font-4xl);
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+/* ============================================================================
+   SECTION LAYOUTS - Visual hierarchy for scanning
+   ============================================================================ */
+
+.page-section {
+  padding: var(--space-16) 0;
+}
+
+.page-section.alt-bg {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.section-intro {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--space-10);
+}
+
+.section-intro h2 {
+  font-size: var(--font-3xl);
+  margin-bottom: var(--space-3);
+}
+
+.section-intro p {
+  font-size: var(--font-lg);
+  color: var(--text-muted);
+}
+
+/* ============================================================================
+   FEATURE PREVIEW - Progressive disclosure
+   ============================================================================ */
+
+.feature-preview {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.feature-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.feature-preview-header h3 {
+  font-size: var(--font-xl);
+  margin: 0;
+}
+
+.feature-preview-content {
+  position: relative;
+}
+
+.feature-preview-content iframe {
+  width: 100%;
+  border: none;
+  display: block;
+}
+
+/* ============================================================================
+   SITE FOOTER - Jakob's Law: Standard footer pattern
+   ============================================================================ */
+
+.site-footer {
+  background: rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: var(--space-12) 0 var(--space-8);
+  margin-top: var(--space-16);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.footer-section h4 {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: var(--space-4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section li {
+  margin-bottom: var(--space-2);
+}
+
+.footer-section a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--font-sm);
+  transition: color var(--transition-fast);
+}
+
+.footer-section a:hover {
+  color: var(--text);
+}
+
+.footer-section p {
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--space-6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+}
+
+/* ============================================================================
+   ACCESSIBILITY - WCAG compliance
+   ============================================================================ */
+
+/* Focus states for keyboard navigation */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent1);
+  outline-offset: 2px;
+}
+
+/* Skip link for screen readers */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: var(--accent1);
+  color: white;
+  padding: var(--space-3) var(--space-4);
+  z-index: 9999;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
