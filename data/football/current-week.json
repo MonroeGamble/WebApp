@@ -1,7 +1,7 @@
 {
   "season": 2025,
   "week": 13,
-  "lastUpdated": "2025-11-29T09:20:55.931Z",
+  "lastUpdated": "2025-11-29T18:29:22.923Z",
   "games": [
     {
       "id": "nfl-[object Object]-401772891",
@@ -455,11 +455,11 @@
         "abbreviation": "OSU",
         "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/194.png"
       },
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
-      "quarter": null,
-      "clock": "0:00",
+      "status": "in_progress",
+      "homeScore": 9,
+      "awayScore": 10,
+      "quarter": 2,
+      "clock": "5:11",
       "possession": null
     },
     {
@@ -482,12 +482,12 @@
         "abbreviation": "TTU",
         "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2641.png"
       },
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
-      "quarter": null,
-      "clock": "0:00",
-      "possession": null
+      "status": "in_progress",
+      "homeScore": 0,
+      "awayScore": 28,
+      "quarter": 2,
+      "clock": "1:54",
+      "possession": "away"
     },
     {
       "id": "ncaa-[object Object]-401754611",
@@ -509,11 +509,11 @@
         "abbreviation": "MIA",
         "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2390.png"
       },
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
-      "quarter": null,
-      "clock": "0:00",
+      "status": "in_progress",
+      "homeScore": 7,
+      "awayScore": 17,
+      "quarter": 2,
+      "clock": "1:54",
       "possession": null
     },
     {
@@ -536,11 +536,11 @@
         "abbreviation": "UCF",
         "logoUrl": "https://a.espncdn.com/i/teamlogos/ncaa/500/2116.png"
       },
-      "status": "scheduled",
-      "homeScore": null,
-      "awayScore": null,
-      "quarter": null,
-      "clock": "0:00",
+      "status": "in_progress",
+      "homeScore": 0,
+      "awayScore": 14,
+      "quarter": 1,
+      "clock": "3:39",
       "possession": null
     },
     {
