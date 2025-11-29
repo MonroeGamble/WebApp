@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Interactive Stock Chart - FranResearch</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
     <link rel="stylesheet" href="../Website/style.css">
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js -->
@@ -45,7 +46,7 @@
             display: block;
         }
 
-        /* Navigation Bar - Directly below ticker, doubled font size */
+        /* Navigation Bar - Consistent with site-wide nav */
         .main-nav {
             position: relative;
             top: 0;
@@ -53,27 +54,51 @@
             width: 100%;
             z-index: 50;
             display: flex;
-            gap: 32px;
-            background: rgba(102, 126, 234, 0.15);
-            padding: 16px 24px;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
+            align-items: center;
+            gap: 20px;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 12px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
             overflow-x: auto;
             box-sizing: border-box;
         }
 
-        .main-nav a {
-            color: rgba(255,255,255,0.9);
+        .main-nav .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             text-decoration: none;
-            font-size: 28px;
-            font-weight: 600;
-            white-space: nowrap;
-            transition: color 0.2s;
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text);
+            margin-right: auto;
         }
 
-        .main-nav a:hover,
+        .main-nav .nav-brand img {
+            height: 28px;
+            width: auto;
+        }
+
+        .main-nav a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            padding: 6px 10px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .main-nav a:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
         .main-nav a.active {
-            color: #667eea;
+            color: var(--accent1);
+            background: rgba(99, 102, 241, 0.15);
         }
 
         /* Main content container */
@@ -224,10 +249,13 @@
 
     <!-- Navigation Bar -->
     <nav class="main-nav">
-        <a href="../index.html">Home</a>
-        <a href="../Website/ticker.html">Stock Ticker</a>
-        <a href="chart.html" class="active">Stock Charts</a>
-        <a href="../FranchiseMap/map.html">Franchise Map</a>
+        <a href="../index.html" class="nav-brand">
+            <img src="../logo.svg" alt="FranResearch">
+            <span>FranResearch</span>
+        </a>
+        <a href="../Website/ticker.html">Ticker</a>
+        <a href="chart.html" class="active">Charts</a>
+        <a href="../FranchiseMap/map.html">Map</a>
         <a href="../FranchiseNews/news-feed.html">News</a>
         <a href="../sports.html">Sports</a>
         <a href="../franchise_calculators_module/index.html">Calculators</a>
